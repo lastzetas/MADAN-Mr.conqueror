@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Star, ChevronLeft, ChevronRight, Shield, CheckCircle2 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -267,8 +267,8 @@ export const RightSidebarDashboard = () => {
 
       </div>
 
-      {/* 4. CONTACT US & INQUIRIES */}
-      <div id="inquiries" className="rounded-xl p-5 bg-[#0C0F15] border border-[#1E2433]">
+      {/* 4. CONTACT US & ENQUIRIES */}
+      <div id="enquiries" className="rounded-xl p-5 bg-[#0C0F15] border border-[#1E2433]">
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           
@@ -288,7 +288,7 @@ export const RightSidebarDashboard = () => {
                 <span className="text-[9px] opacity-70 ml-auto font-mono">FLOOR 18</span>
               </div>
               <p className="text-[10px] leading-tight text-[#8EECCE]">
-                Your conqueror names are sood to oot at the rasad.
+                Your conqueror slot queries and custom room credentials are addressed instantly.
               </p>
             </div>
 
@@ -299,25 +299,25 @@ export const RightSidebarDashboard = () => {
                 <span className="text-[9px] text-[#64748B]">7 hours ago</span>
               </div>
               <p className="text-[10px] text-[#788294] mb-1">
-                Have your in-game accent ready?
+                Have your in-game ID ready for whitelist?
               </p>
               <div className="flex items-center justify-between pt-1 border-t border-[#1E2536] text-[9px]">
-                <span className="text-[#64748B]">Sent text</span>
+                <span className="text-[#64748B]">Match Ops SLA: &lt; 15 mins</span>
                 <span className="text-[#E5C05B] cursor-pointer">More ▾</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: INQUIRIES Form */}
+          {/* Right Column: ENQUIRIES Form */}
           <div>
             <h4 className="font-montserrat font-bold text-xs text-white uppercase mb-2.5">
-              INQUIRIES
+              ENQUIRIES
             </h4>
 
             {submittedInquiry ? (
               <div className="p-3 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-center text-xs font-rajdhani text-emerald-300">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-                <span>Message Received!</span>
+                <span>Enquiry Received!</span>
               </div>
             ) : (
               <form onSubmit={handleSubmitInquiry} className="space-y-2">
@@ -340,7 +340,7 @@ export const RightSidebarDashboard = () => {
                 <textarea
                   rows={2}
                   required
-                  placeholder="Message"
+                  placeholder="Message / Enquiry"
                   value={inquiryMsg}
                   onChange={(e) => setInquiryMsg(e.target.value)}
                   className="w-full px-2.5 py-1.5 rounded-md bg-[#11151E] border border-[#1E2536] focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none resize-none"
@@ -349,7 +349,7 @@ export const RightSidebarDashboard = () => {
                   type="submit"
                   className="w-full py-1.5 rounded-md bg-[#E5C05B] hover:bg-[#F3CF7A] text-[#0A0D12] font-montserrat font-extrabold text-[10px] uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(229,192,91,0.25)]"
                 >
-                  SUBMIT
+                  SUBMIT ENQUIRY
                 </button>
               </form>
             )}

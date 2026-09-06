@@ -27,7 +27,7 @@ export const MobileDrawer = ({
     { id: 'poll', icon: Vote, label: 'Live Fan Poll', badge: 'Vote' },
     { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
     { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
-    { id: 'contact', icon: Mail, label: 'Contact & Official Inquiries' },
+    { id: 'contact', icon: Mail, label: 'Contact & Official Enquiries' },
   ];
 
   const handleNavClick = (sectionId) => {

@@ -19,7 +19,7 @@ export const Sidebar = ({
     { id: 'poll', icon: Vote, label: 'Live Fan Poll' },
     { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
     { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
-    { id: 'contact', icon: Mail, label: 'Contact & Inquiries' },
+    { id: 'contact', icon: Mail, label: 'Contact & Enquiries' },
   ];
 
   return (

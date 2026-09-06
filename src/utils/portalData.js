@@ -416,18 +416,26 @@ export const getStoredInquiries = () => {
   }
 };
 
-export const submitContactInquiry = ({ name, email, message, squad = 'Public Player' }) => {
+export const submitContactInquiry = ({ name, email, phone = '', message, squad = 'General Enquiry' }) => {
   const current = getStoredInquiries();
-  const genId = `INQ-${Math.floor(800 + Math.random() * 199)}`;
+  const genId = `ENQ-${Math.floor(1000 + Math.random() * 9000)}`;
   const newInquiry = {
     id: genId,
-    name: name || 'Anonymous',
-    captain: name || 'Anonymous',
+    name: name || 'Anonymous Player',
+    captain: name || 'Anonymous Player',
     email: email || '',
-    squad: squad || 'Public Inquiry',
-    issue: message || 'General match inquiries & sponsorship proposal',
+    phone: phone || '',
+    squad: squad || 'General Enquiry',
+    issue: message || 'General match enquiries & competitive proposal',
+    message: message || 'General match enquiries & competitive proposal',
     status: 'OPEN',
-    time: 'Just now'
+    createdAt: new Date().toISOString(),
+    time: new Date().toLocaleDateString('en-IN', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   };
 
   const updated = [newInquiry, ...current];
@@ -444,29 +452,53 @@ export const submitContactInquiry = ({ name, email, message, squad = 'Public Pla
     body: JSON.stringify({ inquiry: newInquiry })
   }).catch(err => console.warn('MongoDB inquiry save notice:', err));
 
-  window.dispatchEvent(new CustomEvent('portal_inquiries_updated', { detail: newInquiry }));
+  window.dispatchEvent(new CustomEvent('portal_inquiries_updated', { detail: updated }));
   return newInquiry;
 };
 
-export const resolveInquiry = (id) => {
+export const updateInquiryStatus = (id, newStatus) => {
   const current = getStoredInquiries();
   const updated = current.map(item =>
-    item.id === id ? { ...item, status: 'RESOLVED' } : item
+    item.id === id ? { ...item, status: newStatus } : item
   );
   try {
     localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(updated));
   } catch (e) {
-    console.error('Error resolving inquiry:', e);
+    console.error('Error updating inquiry status in localStorage:', e);
   }
 
   // Update in MongoDB
   fetch('/api/inquiries', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, status: 'RESOLVED' })
-  }).catch(err => console.warn('MongoDB inquiry resolve notice:', err));
+    body: JSON.stringify({ id, status: newStatus })
+  }).catch(err => console.warn('MongoDB inquiry status update notice:', err));
 
-  window.dispatchEvent(new CustomEvent('portal_inquiries_updated'));
+  window.dispatchEvent(new CustomEvent('portal_inquiries_updated', { detail: updated }));
+  return updated;
+};
+
+export const resolveInquiry = (id) => {
+  return updateInquiryStatus(id, 'RESOLVED');
+};
+
+export const deleteInquiry = (id) => {
+  const current = getStoredInquiries();
+  const updated = current.filter(item => item.id !== id);
+  try {
+    localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Error deleting inquiry from localStorage:', e);
+  }
+
+  // Delete in MongoDB
+  fetch('/api/inquiries', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  }).catch(err => console.warn('MongoDB inquiry delete notice:', err));
+
+  window.dispatchEvent(new CustomEvent('portal_inquiries_updated', { detail: updated }));
   return updated;
 };
 

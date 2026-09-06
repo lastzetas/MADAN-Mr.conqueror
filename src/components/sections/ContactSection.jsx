@@ -88,28 +88,28 @@ export const ContactSection = () => {
             </div>
           </div>
 
-          {/* Right Column: INQUIRIES Form */}
+          {/* Right Column: ENQUIRIES Form */}
           <div className="lg:col-span-7 p-5 sm:p-6 rounded-lg bg-[#11151E] border border-[#1E2536] flex flex-col justify-between">
             <div>
               <h3 className="font-montserrat font-extrabold text-base text-white uppercase tracking-wider mb-1">
-                INQUIRIES
+                ENQUIRIES
               </h3>
               <p className="font-rajdhani text-xs text-[#788294] mb-4">
-                Sponsorships, Clan Scrim Licensing & Event Appearances
+                Sponsorships, Clan Scrim Licensing, Creator Invites & Official Queries
               </p>
 
               {submittedInquiry ? (
                 <div className="py-8 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-center text-xs font-rajdhani text-emerald-300 space-y-2">
                   <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                  <span className="font-montserrat font-bold text-sm text-white block">Inquiry Dispatched Successfully!</span>
-                  <p className="text-xs text-[#CBD5E1]">Our tournament management desk will respond to {inquiryEmail || 'your email'} shortly.</p>
+                  <span className="font-montserrat font-bold text-sm text-white block">Enquiry Dispatched Successfully!</span>
+                  <p className="text-xs text-[#CBD5E1]">Our tournament management desk will respond to {inquiryEmail || 'your contact'} shortly.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmitInquiry} className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-rajdhani font-bold text-[#CBD5E1] uppercase mb-1">
-                        Your Name
+                        Your Name *
                       </label>
                       <input
                         type="text"
@@ -122,7 +122,7 @@ export const ContactSection = () => {
                     </div>
                     <div>
                       <label className="block text-[11px] font-rajdhani font-bold text-[#CBD5E1] uppercase mb-1">
-                        Email Address
+                        Email Address *
                       </label>
                       <input
                         type="email"
@@ -137,12 +137,12 @@ export const ContactSection = () => {
 
                   <div>
                     <label className="block text-[11px] font-rajdhani font-bold text-[#CBD5E1] uppercase mb-1">
-                      Message / Proposal
+                      Message / Proposal *
                     </label>
                     <textarea
                       rows={3}
                       required
-                      placeholder="Message"
+                      placeholder="Write your enquiry message or competitive query..."
                       value={inquiryMsg}
                       onChange={(e) => setInquiryMsg(e.target.value)}
                       className="w-full px-3 py-2 rounded-md bg-[#0C0F15] border border-[#1E2536] focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none resize-none"
@@ -153,7 +153,7 @@ export const ContactSection = () => {
                     type="submit"
                     className="w-full py-2.5 rounded-md bg-[#E5C05B] hover:bg-[#F3CF7A] text-[#0A0D12] font-montserrat font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-[0_0_12px_rgba(229,192,91,0.25)] transition-all"
                   >
-                    SUBMIT
+                    SUBMIT ENQUIRY
                   </button>
                 </form>
               )}
