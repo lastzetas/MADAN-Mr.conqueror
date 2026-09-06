@@ -385,6 +385,15 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                           {team.category || 'Season 7 War Grand Finale'}
                         </span>
                         <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase font-mono ${
+                          team.matchType === 'SOLO'
+                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                            : team.matchType === 'DUO'
+                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                            : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                        }`}>
+                          {team.matchType || 'SQUAD'}
+                        </span>
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase font-mono ${
                           team.status === 'WHITELISTED' || team.status === 'VERIFIED'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : team.status === 'REJECTED'
@@ -452,40 +461,57 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                     {/* Middle: IGL Contact Details & Metadata */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono bg-white p-3.5 rounded-2xl border border-[#E2E8F0]">
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">Squad IGL (In Game Leader):</span>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">
+                          {team.matchType === 'SOLO' ? 'Solo Player Name:' : team.matchType === 'DUO' ? 'Duo Leader Name:' : 'Squad IGL (In Game Leader):'}
+                        </span>
                         <strong className="text-[#0F172A] text-sm">{team.iglName || team.captainName || team.captain}</strong>
                       </div>
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">IGL WhatsApp Contact:</span>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">
+                          {team.matchType === 'SOLO' ? 'Player Contact:' : 'Leader WhatsApp Contact:'}
+                        </span>
                         <a
                           href={`https://wa.me/${(team.iglPhone || team.captainPhone || team.phone)?.replace(/[^0-9]/g, '')}`}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold hover:underline"
-                          title="Click to message IGL on WhatsApp"
+                          title="Click to message on WhatsApp"
                         >
                           <Phone className="w-3.5 h-3.5 text-emerald-500" />
                           <span>{team.iglPhone || team.captainPhone || team.phone}</span>
                         </a>
                       </div>
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">IGL Discord / Time:</span>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">Discord / Time:</span>
                         <span className="text-[#334155]">{team.iglDiscord || team.captainDiscord || 'N/A'} • {team.registeredAt}</span>
                       </div>
                     </div>
 
-                    {/* Bottom: 4-Player Roster & IGIDs Breakdown Grid */}
+                    {/* Bottom: Dynamic Player Roster & IGIDs Breakdown Grid */}
                     <div>
                       <span className="text-[10px] font-mono text-[#64748B] uppercase font-bold block mb-2">
-                        Registered 4-Player Starting Roster & In-Game IDs (IGIDs):
+                        Registered {team.matchType === 'SOLO' ? 'Solo Player' : team.matchType === 'DUO' ? '2-Player Duo Roster' : '4-Player Squad Roster'} & In-Game IDs (IGIDs):
                       </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
-                        {(team.players && team.players.length > 0 ? team.players : [
-                          { name: team.iglName || team.captainName || 'Player 1', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'IGL (In Game Leader)' },
-                          { name: 'Player 2', id: team.igids?.split(',')[1]?.trim() || 'N/A', role: 'Assaulter' },
-                          { name: 'Player 3', id: team.igids?.split(',')[2]?.trim() || 'N/A', role: 'Fragger' },
-                          { name: 'Player 4', id: team.igids?.split(',')[3]?.trim() || 'N/A', role: 'Support' }
-                        ]).map((player, idx) => (
+                      <div className={`grid gap-2 text-xs font-mono ${
+                        team.matchType === 'SOLO'
+                          ? 'grid-cols-1 max-w-sm'
+                          : team.matchType === 'DUO'
+                          ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl'
+                          : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+                      }`}>
+                        {(team.players && team.players.length > 0 ? team.players : (
+                          team.matchType === 'SOLO' ? [
+                            { name: team.iglName || team.captainName || 'Solo Player', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'Solo Player' }
+                          ] : team.matchType === 'DUO' ? [
+                            { name: team.iglName || team.captainName || 'Player 1 (Leader)', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'Leader' },
+                            { name: 'Player 2 (Partner)', id: team.igids?.split(',')[1]?.trim() || 'N/A', role: 'Partner' }
+                          ] : [
+                            { name: team.iglName || team.captainName || 'Player 1', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'IGL (In Game Leader)' },
+                            { name: 'Player 2', id: team.igids?.split(',')[1]?.trim() || 'N/A', role: 'Assaulter' },
+                            { name: 'Player 3', id: team.igids?.split(',')[2]?.trim() || 'N/A', role: 'Fragger' },
+                            { name: 'Player 4', id: team.igids?.split(',')[3]?.trim() || 'N/A', role: 'Support' }
+                          ]
+                        )).map((player, idx) => (
                           <div key={idx} className="p-2.5 rounded-xl bg-white border border-[#E2E8F0] flex flex-col justify-between">
                             <div className="flex items-center justify-between">
                               <span className="font-bold text-[#0F172A] truncate">{player.name}</span>
@@ -497,6 +523,11 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                           </div>
                         ))}
                       </div>
+                      {team.substitute && (team.substitute.name || team.substitute.id) && (
+                        <div className="mt-2 text-[11px] font-mono text-[#64748B] bg-slate-50 p-2 rounded-xl border border-slate-200">
+                          <strong>Substitute Player:</strong> {team.substitute.name || 'Sub'} (IGID: {team.substitute.id || 'N/A'})
+                        </div>
+                      )}
                     </div>
 
                   </div>

@@ -98,7 +98,9 @@ export const submitTournamentRegistration = (data) => {
   const genId = `SQ-${Math.floor(100 + Math.random() * 900)}`;
   const genTicket = `MC-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  const cleanIglName = data.iglName || data.captainName || 'Anonymous IGL';
+  const matchType = data.matchType || 'SQUAD'; // 'SOLO' | 'DUO' | 'SQUAD'
+
+  const cleanIglName = data.iglName || data.captainName || data.player1Name || (matchType === 'SOLO' ? 'Solo Warrior' : 'Anonymous IGL');
   const cleanIglPhone = data.iglPhone || data.captainPhone || '+91 99999 00000';
   const cleanIglDiscord = data.iglDiscord || data.captainDiscord || 'N/A';
 
@@ -108,29 +110,40 @@ export const submitTournamentRegistration = (data) => {
   const cleanP4Id = (data.player4Id || '').toString().replace(/\D/g, '');
   const cleanSubId = (data.subId || '').toString().replace(/\D/g, '');
 
-  const igidList = [
-    cleanP1Id,
-    cleanP2Id,
-    cleanP3Id,
-    cleanP4Id,
-    cleanSubId
-  ].filter(Boolean).join(', ');
+  let playersList = [];
+  let igidList = '';
 
-  const playersList = [
-    { name: data.player1Name || cleanIglName || 'Player 1', id: cleanP1Id || 'N/A', role: 'IGL (In Game Leader)' },
-    { name: data.player2Name || 'Player 2', id: cleanP2Id || 'N/A', role: 'Assaulter' },
-    { name: data.player3Name || 'Player 3', id: cleanP3Id || 'N/A', role: 'Fragger' },
-    { name: data.player4Name || 'Player 4', id: cleanP4Id || 'N/A', role: 'Support' },
-  ];
-
-  if (data.subName || cleanSubId) {
-    playersList.push({ name: data.subName || 'Substitute', id: cleanSubId || 'N/A', role: 'Substitute' });
+  if (matchType === 'SOLO') {
+    playersList = [
+      { name: data.player1Name || cleanIglName || 'Solo Player', id: cleanP1Id || 'N/A', role: 'Solo Warrior' }
+    ];
+    igidList = cleanP1Id || 'N/A';
+  } else if (matchType === 'DUO') {
+    playersList = [
+      { name: data.player1Name || cleanIglName || 'Player 1', id: cleanP1Id || 'N/A', role: 'Duo Leader' },
+      { name: data.player2Name || 'Player 2', id: cleanP2Id || 'N/A', role: 'Duo Partner' }
+    ];
+    igidList = [cleanP1Id, cleanP2Id].filter(Boolean).join(', ');
+  } else {
+    playersList = [
+      { name: data.player1Name || cleanIglName || 'Player 1', id: cleanP1Id || 'N/A', role: 'IGL (In Game Leader)' },
+      { name: data.player2Name || 'Player 2', id: cleanP2Id || 'N/A', role: 'Assaulter' },
+      { name: data.player3Name || 'Player 3', id: cleanP3Id || 'N/A', role: 'Fragger' },
+      { name: data.player4Name || 'Player 4', id: cleanP4Id || 'N/A', role: 'Support' },
+    ];
+    if (data.subName || cleanSubId) {
+      playersList.push({ name: data.subName || 'Substitute', id: cleanSubId || 'N/A', role: 'Substitute' });
+    }
+    igidList = [cleanP1Id, cleanP2Id, cleanP3Id, cleanP4Id, cleanSubId].filter(Boolean).join(', ');
   }
+
+  const teamDisplayName = data.teamName || (matchType === 'SOLO' ? `${cleanIglName} (Solo)` : 'Custom Team');
 
   const newSquad = {
     id: genId,
-    teamName: data.teamName || 'Custom Squad',
-    name: data.teamName || 'Custom Squad',
+    teamName: teamDisplayName,
+    name: teamDisplayName,
+    matchType: matchType,
     clanLogo: data.clanLogo || '',
     clanLogoName: data.clanLogoName || '',
     clanTag: data.clanTag || '',
@@ -146,8 +159,8 @@ export const submitTournamentRegistration = (data) => {
     ticketId: genTicket,
     igids: igidList || 'N/A',
     players: playersList,
-    substitute: (data.subName || cleanSubId) ? { name: data.subName, id: cleanSubId } : null,
-    category: data.category || 'Season 7 War Grand Finale',
+    substitute: (matchType === 'SQUAD' && (data.subName || cleanSubId)) ? { name: data.subName, id: cleanSubId } : null,
+    category: data.category || `Season 7 War [${matchType}]`,
     status: 'PENDING', // Enters PENDING state for Admin review
     source: 'JOIN NOW Registration Portal',
     registeredAt: 'Just now',

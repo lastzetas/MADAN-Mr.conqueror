@@ -6,6 +6,7 @@ import { submitTournamentRegistration } from '../utils/portalData';
 
 export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournament }) => {
   const [step, setStep] = useState(1);
+  const [matchType, setMatchType] = useState('SQUAD'); // 'SOLO' | 'DUO' | 'SQUAD'
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     teamName: '',
@@ -33,11 +34,25 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
   const [ticketId, setTicketId] = useState('');
   const [copiedPass, setCopiedPass] = useState(false);
 
+  // Auto-detect match format when opening modal for specific tournament
+  React.useEffect(() => {
+    if (selectedTournament) {
+      const text = `${selectedTournament.title || ''} ${selectedTournament.category || ''} ${selectedTournament.format || ''}`.toUpperCase();
+      if (text.includes('SOLO')) {
+        setMatchType('SOLO');
+      } else if (text.includes('DUO')) {
+        setMatchType('DUO');
+      } else {
+        setMatchType('SQUAD');
+      }
+    }
+  }, [selectedTournament, isOpen]);
+
   if (!isOpen) return null;
 
   const tournamentTitle = selectedTournament?.title || "MADAN CONQUEROR CUP: SEASON 7 GRAND FINALE";
   const prizePool = selectedTournament?.prizePool || "₹2,50,000 INR";
-  const format = selectedTournament?.format || "TPP Squads (Erangel, Miramar, Sanhok)";
+  const format = selectedTournament?.format || (matchType === 'SOLO' ? "TPP Solo Battle" : matchType === 'DUO' ? "TPP Duo Showdown" : "TPP Squads (Erangel, Miramar, Sanhok)");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -105,49 +120,77 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
   const handleNextStep = (e) => {
     e.preventDefault();
     if (step === 1) {
-      const effectiveIglName = formData.iglName || formData.captainName;
+      const effectiveIglName = formData.iglName || formData.captainName || formData.player1Name;
       const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
 
-      if (!formData.teamName || !effectiveIglName || !effectiveIglPhone) {
-        alert("Please complete the required Team Name and IGL (In Game Leader) contact details.");
+      if (!formData.teamName && matchType !== 'SOLO') {
+        alert(`Please complete the required Team Name.`);
+        return;
+      }
+      if (!effectiveIglName || !effectiveIglPhone) {
+        alert(matchType === 'SOLO' ? "Please complete your In-Game Name and WhatsApp Contact." : "Please complete the required Team Name and Leader/IGL contact details.");
         return;
       }
       soundFx.playClick();
       setStep(2);
     } else if (step === 2) {
-      if (!formData.player1Id || !formData.player2Id || !formData.player3Id || !formData.player4Id) {
-        alert("Please provide In-Game Character IDs (numbers only) for all 4 starting roster players.");
-        return;
+      if (matchType === 'SOLO') {
+        if (!formData.player1Id) {
+          alert("Please provide your In-Game Character ID (numbers only).");
+          return;
+        }
+        if (!/^\d+$/.test(formData.player1Id)) {
+          alert("In-Game Character ID (IGID) must contain digits (numbers) only.");
+          return;
+        }
+      } else if (matchType === 'DUO') {
+        if (!formData.player1Id || !formData.player2Id) {
+          alert("Please provide In-Game Character IDs (numbers only) for both 2 Duo players.");
+          return;
+        }
+        if (!/^\d+$/.test(formData.player1Id) || !/^\d+$/.test(formData.player2Id)) {
+          alert("In-Game Character IDs (IGID) must contain digits (numbers) only.");
+          return;
+        }
+      } else {
+        // SQUAD
+        if (!formData.player1Id || !formData.player2Id || !formData.player3Id || !formData.player4Id) {
+          alert("Please provide In-Game Character IDs (numbers only) for all 4 starting roster players.");
+          return;
+        }
+        if (
+          !/^\d+$/.test(formData.player1Id) ||
+          !/^\d+$/.test(formData.player2Id) ||
+          !/^\d+$/.test(formData.player3Id) ||
+          !/^\d+$/.test(formData.player4Id)
+        ) {
+          alert("In-Game Character IDs (IGID) must contain digits (numbers) only, no letters or strings allowed.");
+          return;
+        }
+        if (formData.subId && !/^\d+$/.test(formData.subId)) {
+          alert("Substitute Player IGID must contain digits (numbers) only.");
+          return;
+        }
       }
-      if (
-        !/^\d+$/.test(formData.player1Id) ||
-        !/^\d+$/.test(formData.player2Id) ||
-        !/^\d+$/.test(formData.player3Id) ||
-        !/^\d+$/.test(formData.player4Id)
-      ) {
-        alert("In-Game Character IDs (IGID) must contain digits (numbers) only, no letters or strings allowed.");
-        return;
-      }
-      if (formData.subId && !/^\d+$/.test(formData.subId)) {
-        alert("Substitute Player IGID must contain digits (numbers) only.");
-        return;
-      }
+
       soundFx.playVictory();
       
       // Dispatch registration request directly to Admin & Superadmin Portal
-      const effectiveIglName = formData.iglName || formData.captainName;
+      const effectiveIglName = formData.iglName || formData.captainName || formData.player1Name;
       const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
       const effectiveIglDiscord = formData.iglDiscord || formData.captainDiscord;
 
       const result = submitTournamentRegistration({
         ...formData,
+        matchType,
+        teamName: formData.teamName || (matchType === 'SOLO' ? `${effectiveIglName} (Solo)` : 'Custom Lineup'),
         iglName: effectiveIglName,
         iglPhone: effectiveIglPhone,
         iglDiscord: effectiveIglDiscord,
         captainName: effectiveIglName,
         captainPhone: effectiveIglPhone,
         captainDiscord: effectiveIglDiscord,
-        category: tournamentTitle
+        category: `${tournamentTitle} • ${matchType}`
       });
 
       setSlotCode(result.slotCode);
@@ -165,9 +208,10 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
   };
 
   const handleCopyPass = () => {
-    const effectiveIglName = formData.iglName || formData.captainName;
+    const effectiveIglName = formData.iglName || formData.captainName || formData.player1Name;
     const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
-    const passDetails = `MADAN CONQUEROR CUP APPLICATION TICKET\nTeam: ${formData.teamName}\nSlot: ${slotCode}\nTicket ID: ${ticketId}\nTournament: ${tournamentTitle}\nIGL (In Game Leader): ${effectiveIglName} (${effectiveIglPhone})\nStatus: PENDING ADMIN & SUPERADMIN VERIFICATION`;
+    const teamDisplayName = formData.teamName || (matchType === 'SOLO' ? `${effectiveIglName} (Solo)` : 'Custom Lineup');
+    const passDetails = `MADAN CONQUEROR CUP APPLICATION TICKET\nFormat: ${matchType}\nEntry: ${teamDisplayName}\nSlot: ${slotCode}\nTicket ID: ${ticketId}\nTournament: ${tournamentTitle}\nContact: ${effectiveIglName} (${effectiveIglPhone})\nStatus: PENDING ADMIN & SUPERADMIN VERIFICATION`;
     navigator.clipboard.writeText(passDetails);
     setCopiedPass(true);
     soundFx.playSuccess();
@@ -214,12 +258,12 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#1E2536] text-xs font-montserrat font-bold">
           <div className={`flex items-center gap-2 ${step >= 1 ? 'text-[#E5C05B]' : 'text-gray-500'}`}>
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#E5C05B] text-black font-black' : 'bg-gray-800'}`}>1</span>
-            <span>Squad Info</span>
+            <span>{matchType === 'SOLO' ? 'Solo Details' : matchType === 'DUO' ? 'Duo Lineup' : 'Squad Info'}</span>
           </div>
           <div className={`h-[2px] flex-1 mx-3 ${step >= 2 ? 'bg-[#E5C05B]' : 'bg-gray-800'}`} />
           <div className={`flex items-center gap-2 ${step >= 2 ? 'text-[#E5C05B]' : 'text-gray-500'}`}>
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#E5C05B] text-black font-black' : 'bg-gray-800'}`}>2</span>
-            <span>Roster & IGIDs</span>
+            <span>{matchType === 'SOLO' ? 'Solo IGID' : matchType === 'DUO' ? 'Duo IGIDs (2 Players)' : 'Roster & IGIDs (4 Players)'}</span>
           </div>
           <div className={`h-[2px] flex-1 mx-3 ${step >= 3 ? 'bg-[#E5C05B]' : 'bg-gray-800'}`} />
           <div className={`flex items-center gap-2 ${step === 3 ? 'text-teal-400' : 'text-gray-500'}`}>
@@ -228,29 +272,93 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
           </div>
         </div>
 
-        {/* Step 1: Team Information */}
+        {/* Step 1: Match Type Selection & Team/Contact Information */}
         {step === 1 && (
           <form onSubmit={handleNextStep} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Match Format Selector: SOLO, DUO, SQUAD */}
+            <div>
+              <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span>Select Registration Match Format *</span>
+                <span className="text-[10px] font-mono text-[#E5C05B] font-bold">
+                  {matchType === 'SOLO' ? '1 PLAYER ONLY' : matchType === 'DUO' ? '2 PLAYERS' : '4 PLAYERS + SUB'}
+                </span>
+              </label>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { id: 'SOLO', label: 'Solo', subtitle: '1 Player', icon: User },
+                  { id: 'DUO', label: 'Duo', subtitle: '2 Players', icon: Users },
+                  { id: 'SQUAD', label: 'Squad', subtitle: '4 Players', icon: Shield },
+                ].map((f) => {
+                  const active = matchType === f.id;
+                  const Icon = f.icon;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => {
+                        soundFx.playClick();
+                        setMatchType(f.id);
+                      }}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all cursor-pointer text-center relative overflow-hidden ${
+                        active
+                          ? 'bg-gradient-to-b from-[#E5C05B]/20 via-black/90 to-black border-[#E5C05B] text-white shadow-[0_0_20px_rgba(229,192,91,0.25)]'
+                          : 'bg-black/40 hover:bg-black/60 border-gray-800 text-gray-400 hover:text-gray-200'
+                      }`}
+                    >
+                      {active && (
+                        <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#E5C05B] animate-pulse" />
+                      )}
+                      <Icon className={`w-5 h-5 mb-1 ${active ? 'text-[#E5C05B]' : 'text-gray-500'}`} />
+                      <span className={`text-xs font-montserrat font-black uppercase ${active ? 'text-[#E5C05B]' : 'text-gray-300'}`}>
+                        {f.label}
+                      </span>
+                      <span className="text-[10px] font-mono text-gray-400 mt-0.5">
+                        {f.subtitle}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  Team / Clan Name *
+                  {matchType === 'SOLO'
+                    ? 'Player / Solo Clan Tag (Optional)'
+                    : matchType === 'DUO'
+                    ? 'Duo Team / Clan Name *'
+                    : 'Team / Clan Name *'}
                 </label>
                 <input
                   type="text"
                   name="teamName"
-                  required
-                  placeholder="e.g. Tamil Titans Esports"
+                  required={matchType !== 'SOLO'}
+                  placeholder={
+                    matchType === 'SOLO'
+                      ? 'e.g. Mortal Solo (or leave blank)'
+                      : matchType === 'DUO'
+                      ? 'e.g. Deadly Duo Esports'
+                      : 'e.g. Tamil Titans Esports'
+                  }
                   value={formData.teamName}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
                 />
               </div>
 
-              {/* Clan Logo Upload Area (Replaced Clan Tag) */}
+              {/* Clan / Player Logo Upload Area */}
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1 flex items-center justify-between">
-                  <span>Upload Clan Logo (Optional)</span>
+                  <span>
+                    {matchType === 'SOLO'
+                      ? 'Upload Avatar / Logo (Optional)'
+                      : matchType === 'DUO'
+                      ? 'Upload Duo Logo (Optional)'
+                      : 'Upload Clan Logo (Optional)'}
+                  </span>
                   {formData.clanLogo && (
                     <button
                       type="button"
@@ -275,14 +383,14 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-black/60 border border-[#E5C05B]/60 hover:border-[#E5C05B] transition-all cursor-pointer group"
-                    title="Click to replace clan logo"
+                    title="Click to replace logo"
                   >
                     <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E5C05B] bg-slate-900 shrink-0 flex items-center justify-center">
-                      <img src={formData.clanLogo} alt="Clan Logo" className="w-full h-full object-cover" />
+                      <img src={formData.clanLogo} alt="Logo" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="text-xs text-white font-semibold truncate block">
-                        {formData.clanLogoName || 'Clan_Logo.png'}
+                        {formData.clanLogoName || 'Attached_Logo.png'}
                       </span>
                       <span className="text-[10px] text-teal-400 font-mono block">
                         ✓ Logo Attached • Click to change
@@ -304,21 +412,31 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  IGL (In Game Leader) In-Game / Full Name *
+                  {matchType === 'SOLO'
+                    ? 'Solo Player In-Game / Full Name *'
+                    : matchType === 'DUO'
+                    ? 'Player 1 (Duo Leader) Full Name *'
+                    : 'IGL (In Game Leader) In-Game / Full Name *'}
                 </label>
                 <input
                   type="text"
                   name="iglName"
                   required
-                  placeholder="e.g. Vijay / TTN_Alpha (IGL)"
-                  value={formData.iglName || formData.captainName}
+                  placeholder={
+                    matchType === 'SOLO'
+                      ? 'e.g. Naman Mathur / Mortal'
+                      : matchType === 'DUO'
+                      ? 'e.g. Vijay / TTN_Alpha (Leader)'
+                      : 'e.g. Vijay / TTN_Alpha (IGL)'
+                  }
+                  value={formData.iglName || formData.captainName || formData.player1Name}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  IGL WhatsApp / Phone Number *
+                  {matchType === 'SOLO' ? 'WhatsApp / Phone Number *' : matchType === 'DUO' ? 'Leader WhatsApp / Phone Number *' : 'IGL WhatsApp / Phone Number *'}
                 </label>
                 <input
                   type="tel"
@@ -334,12 +452,12 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
             <div>
               <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                IGL Discord Tag (Optional)
+                {matchType === 'SOLO' ? 'Discord Tag (Optional)' : matchType === 'DUO' ? 'Leader Discord Tag (Optional)' : 'IGL Discord Tag (Optional)'}
               </label>
               <input
                 type="text"
                 name="iglDiscord"
-                placeholder="igl#1234 or discord username"
+                placeholder="discord#1234 or discord username"
                 value={formData.iglDiscord || formData.captainDiscord}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
@@ -351,7 +469,9 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                 type="submit"
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#E5C05B] to-[#8E752D] hover:brightness-110 text-black font-montserrat font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_20px_rgba(229,192,91,0.3)] flex items-center justify-center gap-2"
               >
-                <span>Proceed to Roster Entry</span>
+                <span>
+                  {matchType === 'SOLO' ? 'Proceed to IGID Verification (1 Player)' : matchType === 'DUO' ? 'Proceed to Duo Roster Entry (2 Players)' : 'Proceed to Squad Roster Entry (4 Players)'}
+                </span>
                 <Swords className="w-4 h-4" />
               </button>
             </div>
@@ -361,157 +481,272 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
         {/* Step 2: Roster & In-Game IDs */}
         {step === 2 && (
           <form onSubmit={handleNextStep} className="space-y-4">
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-sans text-amber-300 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <span>Ensure all 4 In-Game IDs (IGIDs) are <strong>numbers only</strong> (BGMI Character ID). Verified directly by Admin & Superadmin anti-cheat desk.</span>
-            </div>
+            
+            {/* SOLO FORMAT: 1 Player Details */}
+            {matchType === 'SOLO' && (
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-sans text-amber-300 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>Solo Registration: Please enter your In-Game Character ID (<strong>numeric digits only</strong>). Verified directly by Admin anti-cheat desk.</span>
+                </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 1 (IGL) IGN & IGID (Numbers Only) *
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    name="player1Name"
-                    required
-                    placeholder="IGN (e.g. Mortal)"
-                    value={formData.player1Name}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={12}
-                    name="player1Id"
-                    required
-                    placeholder="IGID (Numbers Only)"
-                    value={formData.player1Id}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 uppercase mb-1.5">
+                    Solo Player In-Game Name & IGID (Numbers Only) *
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <input
+                      type="text"
+                      name="player1Name"
+                      required
+                      placeholder="IGN (e.g. Mortal)"
+                      value={formData.player1Name || formData.iglName || formData.captainName}
+                      onChange={handleChange}
+                      className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={12}
+                      name="player1Id"
+                      required
+                      placeholder="IGID (Numbers Only e.g. 51293847)"
+                      value={formData.player1Id}
+                      onChange={handleChange}
+                      className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
+            )}
 
-              <div>
-                <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 2 IGN & IGID (Numbers Only) *
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    name="player2Name"
-                    required
-                    placeholder="IGN (e.g. Viper)"
-                    value={formData.player2Name}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={12}
-                    name="player2Id"
-                    required
-                    placeholder="IGID (Numbers Only)"
-                    value={formData.player2Id}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
+            {/* DUO FORMAT: 2 Players Details */}
+            {matchType === 'DUO' && (
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-sans text-amber-300 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>Duo Lineup: Ensure both Duo players' In-Game Character IDs (IGIDs) are <strong>numbers only</strong>. Verified directly by Admin anti-cheat desk.</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 1 (Duo Leader) IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player1Name"
+                        required
+                        placeholder="Player 1 IGN (e.g. Mortal)"
+                        value={formData.player1Name || formData.iglName || formData.captainName}
+                        onChange={handleChange}
+                        className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player1Id"
+                        required
+                        placeholder="Player 1 IGID (Numbers Only)"
+                        value={formData.player1Id}
+                        onChange={handleChange}
+                        className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 2 (Duo Partner) IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player2Name"
+                        required
+                        placeholder="Player 2 IGN (e.g. Viper)"
+                        value={formData.player2Name}
+                        onChange={handleChange}
+                        className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player2Id"
+                        required
+                        placeholder="Player 2 IGID (Numbers Only)"
+                        value={formData.player2Id}
+                        onChange={handleChange}
+                        className="px-3 py-2.5 rounded-xl bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 3 IGN & IGID (Numbers Only) *
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    name="player3Name"
-                    required
-                    placeholder="IGN (e.g. Regaltos)"
-                    value={formData.player3Name}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={12}
-                    name="player3Id"
-                    required
-                    placeholder="IGID (Numbers Only)"
-                    value={formData.player3Id}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
+            {/* SQUAD FORMAT: 4 Starting Players + Optional Substitute */}
+            {matchType === 'SQUAD' && (
+              <div className="space-y-4">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-sans text-amber-300 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>Squad Roster: Ensure all 4 In-Game IDs (IGIDs) are <strong>numbers only</strong> (BGMI Character ID). Verified directly by Admin & Superadmin anti-cheat desk.</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 1 (IGL) IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player1Name"
+                        required
+                        placeholder="IGN (e.g. Mortal)"
+                        value={formData.player1Name || formData.iglName || formData.captainName}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player1Id"
+                        required
+                        placeholder="IGID (Numbers Only)"
+                        value={formData.player1Id}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 2 IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player2Name"
+                        required
+                        placeholder="IGN (e.g. Viper)"
+                        value={formData.player2Name}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player2Id"
+                        required
+                        placeholder="IGID (Numbers Only)"
+                        value={formData.player2Id}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 3 IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player3Name"
+                        required
+                        placeholder="IGN (e.g. Regaltos)"
+                        value={formData.player3Name}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player3Id"
+                        required
+                        placeholder="IGID (Numbers Only)"
+                        value={formData.player3Id}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
+                      Player 4 IGN & IGID (Numbers Only) *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        name="player4Name"
+                        required
+                        placeholder="IGN (e.g. Aman)"
+                        value={formData.player4Name}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={12}
+                        name="player4Id"
+                        required
+                        placeholder="IGID (Numbers Only)"
+                        value={formData.player4Id}
+                        onChange={handleChange}
+                        className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase mb-1">
+                    Substitute Player (Optional - Numbers Only for IGID)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      name="subName"
+                      placeholder="Sub IGN (optional)"
+                      value={formData.subName}
+                      onChange={handleChange}
+                      className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={12}
+                      name="subId"
+                      placeholder="Sub IGID (Numbers Only)"
+                      value={formData.subId}
+                      onChange={handleChange}
+                      className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 4 IGN & IGID (Numbers Only) *
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    name="player4Name"
-                    required
-                    placeholder="IGN (e.g. Aman)"
-                    value={formData.player4Name}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={12}
-                    name="player4Id"
-                    required
-                    placeholder="IGID (Numbers Only)"
-                    value={formData.player4Id}
-                    onChange={handleChange}
-                    className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase mb-1">
-                Substitute Player (Optional - Numbers Only for IGID)
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  name="subName"
-                  placeholder="Sub IGN (optional)"
-                  value={formData.subName}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
-                />
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={12}
-                  name="subId"
-                  placeholder="Sub IGID (Numbers Only)"
-                  value={formData.subId}
-                  onChange={handleChange}
-                  className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
-                />
-              </div>
-            </div>
+            )}
 
             <div className="flex gap-3 pt-3">
               <button
@@ -539,7 +774,7 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
             <div className="p-3.5 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs flex items-center gap-2.5 font-mono">
               <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
               <span>
-                <strong>Application Transmitted!</strong> Your request is sent to the <strong>Admin & Super Admin Portal</strong> for slot whitelisting.
+                <strong>Application Transmitted!</strong> Your <strong>{matchType}</strong> entry request is sent to the <strong>Admin & Super Admin Portal</strong> for slot whitelisting.
               </span>
             </div>
 
@@ -557,7 +792,10 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                     )}
                   </div>
                   <div>
-                    <span className="text-[10px] font-mono font-bold text-[#E5C05B] block">MADAN ESPORTS PASS</span>
+                    <span className="text-[10px] font-mono font-bold text-[#E5C05B] flex items-center gap-1.5">
+                      <span>MADAN ESPORTS PASS</span>
+                      <span className="px-1.5 py-0.2 rounded bg-[#E5C05B]/20 text-[#E5C05B] text-[9px] font-black">{matchType}</span>
+                    </span>
                     <span className="font-mono font-black text-xs sm:text-sm text-white">{ticketId}</span>
                   </div>
                 </div>
@@ -568,14 +806,18 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
               <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                 <div>
-                  <span className="text-gray-400 block text-[10px] font-mono uppercase">REGISTERED SQUAD</span>
+                  <span className="text-gray-400 block text-[10px] font-mono uppercase">
+                    {matchType === 'SOLO' ? 'REGISTERED WARRIOR' : matchType === 'DUO' ? 'REGISTERED DUO' : 'REGISTERED SQUAD'}
+                  </span>
                   <span className="font-montserrat font-bold text-xs sm:text-sm text-white flex items-center gap-1.5">
-                    {formData.teamName}
+                    {formData.teamName || (formData.iglName || formData.captainName || formData.player1Name)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-400 block text-[10px] font-mono uppercase">IGL (IN GAME LEADER) CONTACT</span>
-                  <span className="font-mono text-white text-xs">{formData.iglName || formData.captainName} ({formData.iglPhone || formData.captainPhone})</span>
+                  <span className="text-gray-400 block text-[10px] font-mono uppercase">
+                    {matchType === 'SOLO' ? 'WARRIOR CONTACT' : matchType === 'DUO' ? 'DUO LEADER CONTACT' : 'IGL (IN GAME LEADER) CONTACT'}
+                  </span>
+                  <span className="font-mono text-white text-xs">{formData.iglName || formData.captainName || formData.player1Name} ({formData.iglPhone || formData.captainPhone})</span>
                 </div>
               </div>
 
