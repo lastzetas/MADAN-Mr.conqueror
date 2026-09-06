@@ -1,43 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Swords, Clock, MapPin, Trophy } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Swords, Clock, MapPin, Trophy, Users, ShieldAlert } from 'lucide-react';
 import { soundFx } from '../../utils/audio';
 
 export const TournamentsSection = ({ onOpenTournamentModal }) => {
   const [activeTab, setActiveTab] = useState('ACTIVE');
-  const [timeLeft, setTimeLeft] = useState({
-    days: '00',
-    hours: '07',
-    minutes: '33',
-    seconds: '42'
-  });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        let sec = parseInt(prev.seconds, 10) - 1;
-        let min = parseInt(prev.minutes, 10);
-        let hr = parseInt(prev.hours, 10);
-
-        if (sec < 0) {
-          sec = 59;
-          min -= 1;
-        }
-        if (min < 0) {
-          min = 59;
-          hr -= 1;
-        }
-
-        return {
-          days: '00',
-          hours: hr < 10 ? `0${hr}` : `${hr}`,
-          minutes: min < 10 ? `0${min}` : `${min}`,
-          seconds: sec < 10 ? `0${sec}` : `${sec}`,
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     <section id="tournaments" className="w-full mb-8">
@@ -50,7 +16,7 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
               TOURNAMENTS
             </h3>
             <p className="font-rajdhani text-xs text-[#788294] font-medium">
-              Competitive Battles & Live Countdown
+              Competitive Battles & Limited Squad Slots
             </p>
           </div>
 
@@ -157,7 +123,7 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
 
           </div>
 
-          {/* Right Column: Crest Image & Live Countdown */}
+          {/* Right Column: Crest Image & 25 Slots Limited Box */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             
             {/* Golden Badge Box */}
@@ -169,22 +135,28 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
               />
             </div>
 
-            {/* Live Countdown Box */}
-            <div className="p-4 rounded-lg bg-[#11151E] border border-[#1E2536] text-center flex flex-col items-center justify-center">
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-montserrat font-bold text-[#EA3838] uppercase tracking-widest mb-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#EA3838] animate-ping" />
-                <span>• LIVE</span>
+            {/* ONLY 25 SLOTS FOR SQUAD LIMITED Box */}
+            <div className="p-4 rounded-lg bg-[#11151E] border border-[#1E2536] text-center flex flex-col items-center justify-center relative overflow-hidden group hover:border-[#E5C05B]/50 transition-all shadow-md">
+              {/* Top Accent Gradient Line */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#E5C05B] to-transparent" />
+
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-montserrat font-bold text-[#E5C05B] uppercase tracking-widest mb-1.5 bg-[#E5C05B]/10 px-2.5 py-0.5 rounded-full border border-[#E5C05B]/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E5C05B] animate-ping" />
+                <span>• LIMITED REGISTRATION</span>
               </div>
 
-              <div className="font-montserrat font-black text-2xl sm:text-3xl text-white tracking-widest font-mono">
-                {timeLeft.days} : {timeLeft.hours} : {timeLeft.minutes} : {timeLeft.seconds}
+              <div className="font-montserrat font-black text-2xl sm:text-3xl text-white tracking-tight uppercase">
+                ONLY <span className="text-[#E5C05B]">25</span> SLOTS
               </div>
 
-              <div className="flex items-center justify-between w-full max-w-[210px] text-[10px] font-rajdhani text-[#64748B] uppercase mt-1 font-bold">
-                <span>Days</span>
-                <span>Hours</span>
-                <span>Mins</span>
-                <span>Secs</span>
+              <div className="text-xs sm:text-sm font-montserrat font-extrabold text-[#E2E8F0] tracking-wider uppercase mt-0.5">
+                FOR SQUAD LIMITED
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-[10px] font-rajdhani text-[#788294] font-bold uppercase mt-2 pt-2 border-t border-[#1E2536] w-full">
+                <span className="text-emerald-400 font-mono">● SLOTS 01 – 25</span>
+                <span>•</span>
+                <span>FIRST COME FIRST SERVED</span>
               </div>
             </div>
 
