@@ -112,12 +112,12 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
                     Historic Esport Upcoming Tournament
                   </h4>
                   <p className="font-rajdhani text-xs text-[#788294]">
-                    Active 16 — June 17, 2026 • Erangel Custom Scrim
+                    Active 16 — June 17, 2026 • Erangel Bot Squad War
                   </p>
                 </div>
               </div>
               <span className="text-[10px] font-montserrat font-bold text-[#E5C05B] px-2.5 py-1 rounded bg-black/40 border border-[#2B3448]">
-                SCRIMS
+                BOTSQUADWAR
               </span>
             </div>
 
