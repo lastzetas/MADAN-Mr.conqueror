@@ -107,7 +107,7 @@ export const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
               <input
                 type="text"
                 required
-                placeholder="Enter username (e.g. lastzetas / admin)"
+                placeholder="Enter username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#CBD5E1] focus:border-teal-500 text-[#0F172A] font-sans text-xs focus:outline-none transition-colors shadow-sm"
