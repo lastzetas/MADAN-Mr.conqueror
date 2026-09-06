@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@theme {
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  --color-obsidian-950: #040507;
+  --color-obsidian-900: #07090D;
+  --color-obsidian-800: #0C1017;
+  --color-obsidian-700: #131922;
+  --color-obsidian-600: #1B2330;
+
+  --color-charcoal-900: #11141A;
+  --color-charcoal-800: #181E27;
+  --color-charcoal-700: #222B38;
+
+  --color-gold-300: #FFF3A8;
+  --color-gold-400: #FFE259;
+  --color-gold-500: #FFD700;
+  --color-gold-600: #D4AF37;
+  --color-gold-700: #C5A059;
+  --color-gold-800: #9E7B34;
+  --color-gold-900: #6B4E1B;
+
+  --color-neon-cyan: #00F0FF;
+  --color-neon-pink: #FF2E93;
+  --color-neon-amber: #FF9F1C;
+}
+
+/* Custom Tactical & Esports Utilities */
+@layer utilities {
+  .font-orbitron {
+    font-family: var(--font-orbitron);
+  }
+  .font-rajdhani {
+    font-family: var(--font-rajdhani);
+  }
+  .font-montserrat {
+    font-family: var(--font-montserrat);
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #FFF9D2 0%, #FFD700 25%, #E5B83B 55%, #B38728 85%, #8A5F14 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gold-bright {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFF275 30%, #FFD700 70%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-silver-gradient {
+    background: linear-gradient(135deg, #FFFFFF 0%, #D1D5DB 40%, #9CA3AF 80%, #6B7280 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%);
+  }
+
+  .bg-gold-gradient-hover {
+    background: linear-gradient(135deg, #FFE44D 0%, #FFD700 50%, #C5A059 100%);
+  }
+
+  .border-gold-glow {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.18), inset 0 0 10px rgba(212, 175, 55, 0.05);
+  }
+
+  .border-gold-intense {
+    border-color: rgba(255, 215, 0, 0.7);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.35), inset 0 0 15px rgba(255, 215, 0, 0.1);
+  }
+
+  .glass-card {
+    background: rgba(12, 16, 23, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    background: rgba(18, 24, 35, 0.85);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .tactical-grid {
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+  }
+
+  .tactical-dots {
+    background-size: 24px 24px;
+    background-image: radial-gradient(rgba(212, 175, 55, 0.12) 1px, transparent 1px);
+  }
+
+  .tactical-scanline {
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0),
+      rgba(255,255,255,0) 50%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0.3)
+    );
+    background-size: 100% 4px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #07090D;
+}
+::-webkit-scrollbar-thumb {
+  background: #222B38;
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C5A059;
+}
+
+/* Animation keyframes */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatEmbers {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-200px) translateX(20px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinSlow 25s linear infinite reverse;
+}
+
