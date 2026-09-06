@@ -141,65 +141,7 @@ export const RightSidebarDashboard = () => {
 
       </div>
 
-      {/* 2. COMMUNITY ENGAGEMENT (Superchat Feed) */}
-      <div id="community" className="rounded-xl p-5 bg-[#0C0F15] border border-[#1E2433]">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="font-montserrat font-extrabold text-xs sm:text-sm text-white uppercase tracking-wider">
-              COMMUNITY ENGAGEMENT
-            </h3>
-            <span className="font-rajdhani text-xs text-[#788294] font-semibold">
-              Superchat Feed
-            </span>
-          </div>
 
-          <button
-            onClick={handleSendQuickSuperchat}
-            onMouseEnter={() => soundFx.playHover()}
-            className="px-2.5 py-1 rounded bg-[#131722] border border-[#E5C05B]/50 text-[10px] font-montserrat font-bold text-[#E5C05B] uppercase flex items-center gap-1 hover:bg-[#E5C05B]/10 cursor-pointer"
-          >
-            <span>Superchat</span>
-            <span>▾</span>
-          </button>
-        </div>
-
-        {/* Superchat items list */}
-        <div className="space-y-2 text-xs font-rajdhani">
-          {superchats.map((sc) => (
-            <div
-              key={sc.id}
-              className={`p-2 rounded-lg border flex items-center justify-between gap-2 transition-all ${
-                sc.isGold
-                  ? 'bg-[#262010] border-[#8E752D] text-[#E5C05B]'
-                  : 'bg-[#11151E] border-[#1E2536]'
-              }`}
-            >
-              <div className="flex items-center gap-2 truncate">
-                <div className="w-5 h-5 rounded-full bg-[#1E2433] border border-[#2B3448] flex items-center justify-center text-[10px] text-[#E5C05B] shrink-0">
-                  {sc.name[0]}
-                </div>
-                <div className="truncate">
-                  <span className="font-montserrat font-bold text-[11px] text-white mr-1.5">
-                    {sc.name}
-                  </span>
-                  {sc.msg && (
-                    <span className="text-[10px] text-[#788294] font-sans truncate">
-                      {sc.msg}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <span className="font-mono text-xs font-bold text-[#E5C05B] shrink-0">
-                {sc.amount}
-              </span>
-            </div>
-          ))}
-        </div>
-
-      </div>
 
       {/* 3. CURATED REVIEWS */}
       <div className="rounded-xl p-5 bg-[#0C0F15] border border-[#1E2433]">

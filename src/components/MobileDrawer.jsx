@@ -25,7 +25,6 @@ export const MobileDrawer = ({
     { id: 'tournaments', icon: Swords, label: 'Tournaments Hub', badge: 'S7 War' },
     { id: 'winners', icon: Shield, label: 'Winners & Hall of Fame', highlight: 'OG-BTS 6x' },
     { id: 'poll', icon: Vote, label: 'Live Fan Poll', badge: 'Vote' },
-    { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
     { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
     { id: 'contact', icon: Mail, label: 'Contact & Official Enquiries' },
   ];

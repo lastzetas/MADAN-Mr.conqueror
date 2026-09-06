@@ -7,7 +7,6 @@ import { TrophiesSection } from './components/sections/TrophiesSection';
 import { TournamentsSection } from './components/sections/TournamentsSection';
 import { WinnersSection } from './components/sections/WinnersSection';
 import { PollSection } from './components/sections/PollSection';
-import { CommunitySection } from './components/sections/CommunitySection';
 import { SponsorsSection } from './components/sections/SponsorsSection';
 import { ContactSection } from './components/sections/ContactSection';
 import { TournamentRegistrationModal } from './components/TournamentRegistrationModal';
@@ -119,7 +118,7 @@ export function App() {
     if (currentView !== 'portal') return;
 
     const handleScroll = () => {
-      const sections = ['hero', 'records', 'trophies', 'tournaments', 'winners', 'poll', 'community', 'sponsors', 'contact'];
+      const sections = ['hero', 'records', 'trophies', 'tournaments', 'winners', 'poll', 'sponsors', 'contact'];
       const scrollPosition = window.scrollY + 250;
 
       for (const section of sections) {
@@ -242,13 +241,10 @@ export function App() {
           {/* Section 6: Live Fan Poll Section */}
           <PollSection />
 
-          {/* Section 7: Community Engagement & Superchat Feed */}
-          <CommunitySection />
-
-          {/* Section 8: Sponsors & Supporters Showcase (Replaced Reviews) */}
+          {/* Section 7: Sponsors & Supporters Showcase */}
           <SponsorsSection onOpenSponsorModal={() => setIsSponsorModalOpen(true)} />
 
-          {/* Section 9: Contact Us & Official Inquiries Desk */}
+          {/* Section 8: Contact Us & Official Enquiries Desk */}
           <ContactSection />
 
         </main>

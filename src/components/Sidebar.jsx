@@ -17,7 +17,6 @@ export const Sidebar = ({
     { id: 'tournaments', icon: Swords, label: 'Tournaments' },
     { id: 'winners', icon: Shield, label: 'Winners & Hall of Fame' },
     { id: 'poll', icon: Vote, label: 'Live Fan Poll' },
-    { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
     { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
     { id: 'contact', icon: Mail, label: 'Contact & Enquiries' },
   ];
