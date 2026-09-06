@@ -8,7 +8,7 @@ const STORAGE_KEYS = {
   TOURNAMENTS: 'madan_portal_tournaments_v7',
   HALL_OF_FAME: 'madan_portal_hall_of_fame_v7',
   POLLS: 'madan_portal_polls_v7',
-  SPONSORS: 'madan_portal_sponsors_v7',
+  SPONSORS: 'madan_portal_sponsors_v8',
   SPONSOR_REQUESTS: 'madan_portal_sponsor_requests_v7',
   ROOM_BROADCAST: 'madan_portal_room_broadcast_v7'
 };
@@ -792,58 +792,19 @@ export const votePoll = (pollId, optionIndex) => {
 // 13. SPONSORS & SUPPORTERS MANAGEMENT
 // ==========================================
 
-const INITIAL_SPONSORS = [
-  {
-    id: 'sp-1',
-    name: 'Red Bull Gaming',
-    category: 'Title Energy Partner',
-    tier: 'TITLE',
-    logo: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&auto=format&fit=crop&q=80',
-    link: 'https://redbull.com',
-    status: 'ACTIVE',
-    tagline: 'Gives You Wings for the Final Circle'
-  },
-  {
-    id: 'sp-2',
-    name: 'ASUS ROG Esports',
-    category: 'Official Device Partner',
-    tier: 'PLATINUM',
-    logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&auto=format&fit=crop&q=80',
-    link: 'https://rog.asus.com',
-    status: 'ACTIVE',
-    tagline: '144Hz Smooth Conqueror Gaming'
-  },
-  {
-    id: 'sp-3',
-    name: 'Monster Energy',
-    category: 'Official Refreshment Partner',
-    tier: 'GOLD',
-    logo: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&auto=format&fit=crop&q=80',
-    link: 'https://monsterenergy.com',
-    status: 'ACTIVE',
-    tagline: 'Unleash the Conqueror Beast'
-  },
-  {
-    id: 'sp-4',
-    name: 'Razer Gaming Gear',
-    category: 'Official Peripherals Partner',
-    tier: 'GOLD',
-    logo: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=300&auto=format&fit=crop&q=80',
-    link: 'https://razer.com',
-    status: 'ACTIVE',
-    tagline: 'For Gamers, By Gamers'
-  }
-];
+// ZERO DEMO SPONSORS - Real-time admin managed only
+const INITIAL_SPONSORS = [];
 
 export const getStoredSponsors = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SPONSORS);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.SPONSORS, JSON.stringify(INITIAL_SPONSORS));
       return INITIAL_SPONSORS;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SPONSORS;
+    if (!Array.isArray(parsed)) return INITIAL_SPONSORS;
+    // Strip any legacy demo IDs
+    return parsed.filter(s => !['sp-1', 'sp-2', 'sp-3', 'sp-4'].includes(s.id));
   } catch (e) {
     return INITIAL_SPONSORS;
   }

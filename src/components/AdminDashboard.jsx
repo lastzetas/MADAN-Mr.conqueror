@@ -1518,59 +1518,69 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
               {/* SUB-VIEW 2: LIVE DISPLAYED SPONSORS (FULL CRUD) */}
               {sponsorSubTab === 'LIVE_SPONSORS' && (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {sponsors.map((s) => (
-                      <div key={s.id} className="bg-white border border-[#CBD5E1] rounded-3xl p-5 shadow-xs space-y-3 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold uppercase">
-                              {s.tier || 'OFFICIAL'}
-                            </span>
-                            <span className={"text-[10px] px-2 py-0.5 rounded-full font-bold uppercase " + (
-                              s.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                            )}>
-                              {s.status}
-                            </span>
+                  {sponsors.length === 0 ? (
+                    <div className="bg-white border border-[#E2E8F0] rounded-3xl p-8 text-center space-y-2">
+                      <Award className="w-8 h-8 text-slate-400 mx-auto" />
+                      <h4 className="font-bold text-sm text-[#0F172A]">No Live Sponsors Displayed</h4>
+                      <p className="text-xs text-[#64748B] max-w-md mx-auto">
+                        No demo sponsors are loaded. Click "+ Add Official Sponsor" above to add partners directly, or approve proposals from "Incoming Sponsor Requests".
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {sponsors.map((s) => (
+                        <div key={s.id} className="bg-white border border-[#CBD5E1] rounded-3xl p-5 shadow-xs space-y-3 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold uppercase">
+                                {s.tier || 'OFFICIAL'}
+                              </span>
+                              <span className={"text-[10px] px-2 py-0.5 rounded-full font-bold uppercase " + (
+                                s.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
+                              )}>
+                                {s.status}
+                              </span>
+                            </div>
+
+                            <div className="w-full h-24 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center p-3 mb-2 overflow-hidden">
+                              {s.logo ? (
+                                <img src={s.logo} alt={s.name} className="max-h-full max-w-full object-contain" />
+                              ) : (
+                                <div className="flex items-center gap-1.5 text-slate-500 font-bold text-xs">
+                                  <Award className="w-5 h-5 text-amber-500" />
+                                  <span>{s.name}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <h4 className="font-montserrat font-bold text-sm text-[#0F172A] truncate">
+                              {s.name}
+                            </h4>
+                            <p className="text-xs text-[#64748B]">{s.category || 'Official Partner'}</p>
+                            {s.tagline && <p className="text-[11px] text-slate-500 italic truncate">"{s.tagline}"</p>}
                           </div>
 
-                          <div className="w-full h-24 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center p-3 mb-2 overflow-hidden">
-                            {s.logo ? (
-                              <img src={s.logo} alt={s.name} className="max-h-full max-w-full object-contain" />
-                            ) : (
-                              <div className="flex items-center gap-1.5 text-slate-500 font-bold text-xs">
-                                <Award className="w-5 h-5 text-amber-500" />
-                                <span>{s.name}</span>
-                              </div>
-                            )}
+                          <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between">
+                            <button
+                              onClick={() => handleEditSponsor(s)}
+                              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteSponsor(s.id)}
+                              className="p-1.5 rounded-xl text-red-500 hover:bg-red-50 cursor-pointer"
+                              title="Delete Sponsor"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
-
-                          <h4 className="font-montserrat font-bold text-sm text-[#0F172A] truncate">
-                            {s.name}
-                          </h4>
-                          <p className="text-xs text-[#64748B]">{s.category || 'Official Partner'}</p>
-                          {s.tagline && <p className="text-[11px] text-slate-500 italic truncate">"{s.tagline}"</p>}
                         </div>
-
-                        <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between">
-                          <button
-                            onClick={() => handleEditSponsor(s)}
-                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleDeleteSponsor(s.id)}
-                            className="p-1.5 rounded-xl text-red-500 hover:bg-red-50 cursor-pointer"
-                            title="Delete Sponsor"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
