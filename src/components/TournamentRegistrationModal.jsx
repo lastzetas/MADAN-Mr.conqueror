@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { X, Swords, Shield, QrCode, CheckCircle2, Copy, Check, Download, AlertCircle, Sparkles, User, Users, Clock, Send, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { X, Swords, Shield, QrCode, CheckCircle2, Copy, Check, Download, AlertCircle, Sparkles, User, Users, Clock, Send, Upload, Image as ImageIcon, Trash2, Loader2, CloudUpload } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { submitTournamentRegistration } from '../utils/portalData';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
 export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournament }) => {
   const [step, setStep] = useState(1);
   const [matchType, setMatchType] = useState('SQUAD'); // 'SOLO' | 'DUO' | 'SQUAD'
   const fileInputRef = useRef(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [formData, setFormData] = useState({
     teamName: '',
     clanLogo: '',
@@ -81,17 +83,22 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLogoUpload = (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file (PNG, JPG, WEBP, or SVG).');
       return;
     }
-    if (file.size > 2.5 * 1024 * 1024) {
-      alert('Logo file size exceeds 2.5MB. Please upload a smaller image.');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Logo file size exceeds 10MB. Please upload a smaller image.');
       return;
     }
+
+    setIsUploadingLogo(true);
+    soundFx.playClick();
+
+    // 1. Immediate local preview for responsive UX
     const reader = new FileReader();
     reader.onload = (event) => {
       setFormData(prev => ({
@@ -99,9 +106,24 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
         clanLogo: event.target.result,
         clanLogoName: file.name
       }));
-      soundFx.playClick();
     };
     reader.readAsDataURL(file);
+
+    // 2. Direct upload to Cloudinary (cloud_name: ntnojoha)
+    try {
+      const uploadRes = await uploadToCloudinary(file, { folder: 'madan_clan_logos' });
+      if (uploadRes.success && uploadRes.secure_url) {
+        setFormData(prev => ({
+          ...prev,
+          clanLogo: uploadRes.secure_url,
+          clanLogoName: file.name
+        }));
+      }
+    } catch (err) {
+      console.warn('Cloudinary upload fallback to local preview:', err);
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
   const handleRemoveLogo = (e) => {
@@ -379,7 +401,12 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                   className="hidden"
                 />
 
-                {formData.clanLogo ? (
+                {isUploadingLogo ? (
+                  <div className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-black/60 border border-teal-500/50 text-teal-300 font-mono text-xs">
+                    <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
+                    <span>Uploading image to Cloudinary CDN (ntnojoha)...</span>
+                  </div>
+                ) : formData.clanLogo ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-black/60 border border-[#E5C05B]/60 hover:border-[#E5C05B] transition-all cursor-pointer group"
@@ -392,8 +419,9 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                       <span className="text-xs text-white font-semibold truncate block">
                         {formData.clanLogoName || 'Attached_Logo.png'}
                       </span>
-                      <span className="text-[10px] text-teal-400 font-mono block">
-                        ✓ Logo Attached • Click to change
+                      <span className="text-[10px] text-teal-400 font-mono flex items-center gap-1">
+                        <CloudUpload className="w-3 h-3 text-teal-400" />
+                        {formData.clanLogo.includes('cloudinary.com') ? 'Cloudinary CDN Synced • Click to change' : '✓ Logo Attached • Click to change'}
                       </span>
                     </div>
                   </div>
@@ -403,7 +431,7 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                     className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-black/40 border border-dashed border-gray-700 hover:border-[#E5C05B]/70 hover:bg-black/60 transition-all cursor-pointer text-gray-400 hover:text-gray-200"
                   >
                     <Upload className="w-4 h-4 text-[#E5C05B]" />
-                    <span className="text-xs font-sans">Choose Logo (PNG/JPG up to 2.5MB)</span>
+                    <span className="text-xs font-sans">Choose Logo (PNG/JPG/WEBP up to 10MB)</span>
                   </div>
                 )}
               </div>
