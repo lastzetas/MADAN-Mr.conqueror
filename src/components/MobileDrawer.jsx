@@ -97,7 +97,7 @@ export const MobileDrawer = ({
                   </span>
                 </div>
                 <p className="text-[10px] text-[#94A3B8] font-mono truncate">
-                  {currentUser.email}
+                  @{currentUser.username || currentUser.name || (currentUser.role === 'SUPER_ADMIN' ? 'lastzetas' : 'admin')}
                 </p>
 
                 <div className="flex items-center gap-1.5 pt-1">

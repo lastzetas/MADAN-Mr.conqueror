@@ -1,11 +1,13 @@
 // Cryptographic Salt & Secure Hash for Super Admin & Match Ops Admin
 const PASSWORD_SALT = 'madan_conqueror_esports_2026_salt';
 
-const SUPER_ADMIN_EMAIL = 'lastzetas@gmail.com';
-const SUPER_ADMIN_HASH = '00db580ce2193b15e1a5b739396182477dfac069abc15a85cd394da90415545e'; // Hackler@21
+export const SUPER_ADMIN_USERNAME = 'lastzetas';
+export const SUPER_ADMIN_EMAIL = 'lastzetas@gmail.com';
+export const SUPER_ADMIN_HASH = '00db580ce2193b15e1a5b739396182477dfac069abc15a85cd394da90415545e'; // Hackler@21
 
-const ADMIN_EMAIL = 'admin@madan.in';
-const ADMIN_HASH = 'ce028ff1dd39e85c4a6334d2a88bca9de49938790b38cced55a619c1ea6fc3bd'; // Admin@2026
+export const ADMIN_USERNAME = 'admin';
+export const ADMIN_EMAIL = 'admin@madan.in';
+export const ADMIN_HASH = 'ce028ff1dd39e85c4a6334d2a88bca9de49938790b38cced55a619c1ea6fc3bd'; // Admin@2026
 
 const JWT_SECRET_SALT = 'madan_jwt_secret_key_9fc8e5d1_2026';
 const TOKEN_STORAGE_KEY = 'madan_auth_jwt';
@@ -103,16 +105,17 @@ export const verifyJwtToken = async (token) => {
 };
 
 // Main Authenticate function with Secured Password Hashing & JWT Generation
-export const authenticateUser = async (email, password) => {
-  const cleanEmail = email.trim().toLowerCase();
+export const authenticateUser = async (usernameOrEmail, password) => {
+  const cleanInput = (usernameOrEmail || '').trim().toLowerCase();
 
   // Hash input password securely with salt
   const inputHash = await hashPassword(password);
 
-  // 1. Super Admin Check
-  if (cleanEmail === SUPER_ADMIN_EMAIL && inputHash === SUPER_ADMIN_HASH) {
+  // 1. Super Admin Check (Accepts username 'lastzetas' or email 'lastzetas@gmail.com')
+  if ((cleanInput === SUPER_ADMIN_USERNAME || cleanInput === SUPER_ADMIN_EMAIL) && inputHash === SUPER_ADMIN_HASH) {
     const userPayload = {
-      sub: SUPER_ADMIN_EMAIL,
+      sub: SUPER_ADMIN_USERNAME,
+      username: 'lastzetas',
       email: SUPER_ADMIN_EMAIL,
       name: 'Last Zetas',
       role: 'SUPER_ADMIN',
@@ -134,10 +137,11 @@ export const authenticateUser = async (email, password) => {
     };
   }
 
-  // 2. Match Ops Admin Check
-  if (cleanEmail === ADMIN_EMAIL && inputHash === ADMIN_HASH) {
+  // 2. Match Ops Admin Check (Accepts username 'admin' or email 'admin@madan.in')
+  if ((cleanInput === ADMIN_USERNAME || cleanInput === ADMIN_EMAIL || cleanInput === 'admin@madan.gg') && inputHash === ADMIN_HASH) {
     const userPayload = {
-      sub: ADMIN_EMAIL,
+      sub: ADMIN_USERNAME,
+      username: 'admin',
       email: ADMIN_EMAIL,
       name: 'Match Ops Lead',
       role: 'ADMIN',
@@ -161,42 +165,37 @@ export const authenticateUser = async (email, password) => {
 
   return {
     success: false,
-    message: 'Invalid email or password. Please check your credentials.'
+    message: 'Invalid username/email or password. Please check your credentials.'
   };
 };
 
 // Get active session from stored JWT
 export const getActiveSession = async () => {
   try {
-    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (!storedToken) return null;
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!token) return null;
 
-    const verifiedPayload = await verifyJwtToken(storedToken);
-    if (!verifiedPayload) {
+    const payload = await verifyJwtToken(token);
+    if (!payload) {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       return null;
     }
 
     return {
-      token: storedToken,
-      user: {
-        email: verifiedPayload.email || verifiedPayload.sub,
-        name: verifiedPayload.name,
-        role: verifiedPayload.role,
-        badge: verifiedPayload.badge,
-        permissions: verifiedPayload.permissions || []
-      }
+      token,
+      user: payload
     };
   } catch (err) {
+    console.error('Session retrieval error:', err);
     return null;
   }
 };
 
-// Logout and clear JWT
+// Logout User
 export const logoutUser = () => {
   try {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
   } catch (e) {
-    // ignore
+    console.error('Error logging out:', e);
   }
 };

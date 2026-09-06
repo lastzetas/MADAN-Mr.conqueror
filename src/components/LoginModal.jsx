@@ -98,16 +98,16 @@ export const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         <form onSubmit={handleLogin} className="space-y-3.5">
           <div>
             <label className="block text-[10px] font-bold text-[#475569] uppercase mb-1">
-              Email Address
+              Username
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#94A3B8]">
                 <Mail className="w-3.5 h-3.5" />
               </div>
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="e.g. lastzetas@gmail.com"
+                placeholder="Enter username (e.g. lastzetas / admin)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-[#CBD5E1] focus:border-teal-500 text-[#0F172A] font-sans text-xs focus:outline-none transition-colors shadow-sm"

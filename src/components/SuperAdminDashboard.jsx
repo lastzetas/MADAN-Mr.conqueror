@@ -145,7 +145,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                 )}
               </div>
               <p className="text-[11px] text-[#64748B] font-mono">
-                {user?.email || 'lastzetas@gmail.com'} • JWT: HS256 Verified
+                @{user?.username || 'lastzetas'} • JWT: HS256 Verified
               </p>
             </div>
           </div>
@@ -988,7 +988,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
             <div className="p-4 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs space-y-2">
               <div className="text-emerald-400">✓ Cryptographic Salt: SHA-256 Enabled</div>
               <div className="text-slate-300">✓ Token Signing: HMAC-SHA256 (HS256)</div>
-              <div className="text-slate-300">✓ Active Session: {user?.email || 'lastzetas@gmail.com'}</div>
+              <div className="text-slate-300">✓ Active Session: @{user?.username || 'lastzetas'} ({user?.name || 'Last Zetas'})</div>
               <div className="text-teal-400">✓ Anti-Tamper State: OK</div>
             </div>
           </div>

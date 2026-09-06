@@ -74,7 +74,7 @@ export const SuperAdminPanel = ({ isOpen, onClose, user, onLogout }) => {
                 </span>
               </div>
               <p className="font-rajdhani text-xs text-[#CBD5E1]">
-                Logged in as: <strong className="text-[#E5C05B]">{user?.email || 'lastzetas@gmail.com'}</strong> ({user?.name || 'Last Zetas'})
+                Logged in as: <strong className="text-[#E5C05B]">@{user?.username || 'lastzetas'}</strong> ({user?.name || 'Last Zetas'})
               </p>
             </div>
           </div>
