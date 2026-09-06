@@ -3,7 +3,7 @@ const PASSWORD_SALT = 'madan_conqueror_esports_2026_salt';
 
 export const SUPER_ADMIN_USERNAME = 'lastzetas';
 export const SUPER_ADMIN_EMAIL = 'lastzetas@gmail.com';
-export const SUPER_ADMIN_HASH = '00db580ce2193b15e1a5b739396182477dfac069abc15a85cd394da90415545e'; // Hackler@21
+export const SUPER_ADMIN_HASH = '6f5cb341731e3eb276f896e23d4bc9cefc2e2f920b3c03cdae662ebfe9f52c0f'; // Hacker@21
 
 export const ADMIN_USERNAME = 'admin';
 export const ADMIN_EMAIL = 'admin@madan.in';
@@ -39,8 +39,12 @@ const base64UrlDecode = (str) => {
 export const hashPassword = async (password, salt = PASSWORD_SALT) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(salt + password);
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-  return bufferToHex(hashBuffer);
+  const cryptoObj = (typeof window !== 'undefined' && window.crypto) || (typeof crypto !== 'undefined' ? crypto : null);
+  if (cryptoObj && cryptoObj.subtle) {
+    const hashBuffer = await cryptoObj.subtle.digest('SHA-256', data);
+    return bufferToHex(hashBuffer);
+  }
+  return '';
 };
 
 // Create Signed JWT (JSON Web Token)
