@@ -6,20 +6,22 @@ import { RecordsSection } from './components/sections/RecordsSection';
 import { TrophiesSection } from './components/sections/TrophiesSection';
 import { TournamentsSection } from './components/sections/TournamentsSection';
 import { WinnersSection } from './components/sections/WinnersSection';
+import { PollSection } from './components/sections/PollSection';
 import { CommunitySection } from './components/sections/CommunitySection';
-import { ReviewsSection } from './components/sections/ReviewsSection';
+import { SponsorsSection } from './components/sections/SponsorsSection';
 import { ContactSection } from './components/sections/ContactSection';
 import { TournamentRegistrationModal } from './components/TournamentRegistrationModal';
 import { LiveStreamModal } from './components/LiveStreamModal';
 import { LoginModal } from './components/LoginModal';
 import { SuperAdminDashboard } from './components/SuperAdminDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
+import { TeamPortal } from './components/TeamPortal';
 import { MobileDrawer } from './components/MobileDrawer';
 import { getActiveSession, logoutUser } from './utils/auth';
 
 export function App() {
   const [activeSection, setActiveSection] = useState('hero');
-  // Full-page View Router: 'portal' | 'superadmin' | 'admin'
+  // Full-page View Router: 'portal' | 'superadmin' | 'admin' | 'team'
   const [currentView, setCurrentView] = useState('portal');
 
   // Interactive Modals State
@@ -31,6 +33,7 @@ export function App() {
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState(null);
+  const [currentTeam, setCurrentTeam] = useState(null);
 
   // Restore JWT session on app load
   useEffect(() => {
@@ -86,19 +89,26 @@ export function App() {
     }
   };
 
-  const handleLoginSuccess = (user, token) => {
-    setCurrentUser(user);
+  const handleLoginSuccess = (userOrTeam, token, type) => {
     setIsLoginModalOpen(false);
-    if (user?.role === 'SUPER_ADMIN') {
-      setCurrentView('superadmin');
+
+    if (type === 'team' || userOrTeam?.ticketId || userOrTeam?.passcode) {
+      setCurrentTeam(userOrTeam);
+      setCurrentView('team');
     } else {
-      setCurrentView('admin');
+      setCurrentUser(userOrTeam);
+      if (userOrTeam?.role === 'SUPER_ADMIN') {
+        setCurrentView('superadmin');
+      } else {
+        setCurrentView('admin');
+      }
     }
   };
 
   const handleLogout = () => {
     logoutUser();
     setCurrentUser(null);
+    setCurrentTeam(null);
     setCurrentView('portal');
   };
 
@@ -107,7 +117,7 @@ export function App() {
     if (currentView !== 'portal') return;
 
     const handleScroll = () => {
-      const sections = ['hero', 'records', 'trophies', 'tournaments', 'winners', 'community', 'reviews', 'contact'];
+      const sections = ['hero', 'records', 'trophies', 'tournaments', 'winners', 'poll', 'community', 'sponsors', 'contact'];
       const scrollPosition = window.scrollY + 250;
 
       for (const section of sections) {
@@ -165,7 +175,25 @@ export function App() {
     );
   }
 
-  // VIEW 3: PUBLIC PORTAL (FULL SCREEN)
+  // VIEW 3: TEAM / PLAYER DEDICATED ROOM DISPATCHER PORTAL
+  if (currentView === 'team') {
+    return (
+      <>
+        <TeamPortal
+          team={currentTeam}
+          onLogout={handleLogout}
+          onBackToPortal={() => setCurrentView('portal')}
+        />
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onClose={handleCloseLogin}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      </>
+    );
+  }
+
+  // VIEW 4: PUBLIC PORTAL (FULL SCREEN)
   return (
     <div className="min-h-screen bg-[#090B0E] text-[#E2E8F0] font-sans flex antialiased selection:bg-[#E5C05B]/30 selection:text-[#E5C05B]">
       
@@ -209,13 +237,16 @@ export function App() {
           {/* Section 5: Winners Cash List & Hall of Fame Squads (Seasonal, Solo, Duo, Squad) */}
           <WinnersSection onOpenTournamentModal={handleOpenTournamentModal} />
 
-          {/* Section 6: Community Engagement & Superchat Feed */}
+          {/* Section 6: Live Fan Poll Section */}
+          <PollSection />
+
+          {/* Section 7: Community Engagement & Superchat Feed */}
           <CommunitySection />
 
-          {/* Section 7: Curated Reviews & 5-Star Testimonials */}
-          <ReviewsSection />
+          {/* Section 8: Sponsors & Supporters Showcase (Replaced Reviews) */}
+          <SponsorsSection />
 
-          {/* Section 8: Contact Us & Official Inquiries Desk */}
+          {/* Section 9: Contact Us & Official Inquiries Desk */}
           <ContactSection />
 
         </main>

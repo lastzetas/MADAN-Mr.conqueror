@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  X, Home, Trophy, Swords, MessageSquare, BarChart2, Star, Mail,
-  Shield, Crown, Key, LogOut, ArrowRight, ExternalLink
+  X, Home, Trophy, Swords, MessageSquare, BarChart2, Mail,
+  Shield, Crown, Key, LogOut, ArrowRight, ExternalLink, Vote, Sparkles
 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 
@@ -24,8 +24,9 @@ export const MobileDrawer = ({
     { id: 'trophies', icon: Trophy, label: 'Achievements & Milestones' },
     { id: 'tournaments', icon: Swords, label: 'Tournaments Hub', badge: 'S7 War' },
     { id: 'winners', icon: Shield, label: 'Winners & Hall of Fame', highlight: 'OG-BTS 6x' },
+    { id: 'poll', icon: Vote, label: 'Live Fan Poll', badge: 'Vote' },
     { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
-    { id: 'reviews', icon: Star, label: 'Curated 5-Star Reviews' },
+    { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
     { id: 'contact', icon: Mail, label: 'Contact & Official Inquiries' },
   ];
 

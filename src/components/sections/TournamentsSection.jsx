@@ -1,9 +1,26 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Swords, Clock, MapPin, Trophy, Users, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Swords, Clock, MapPin, Trophy, Users, ShieldAlert, Calendar, Sparkles } from 'lucide-react';
 import { soundFx } from '../../utils/audio';
+import { getStoredTournaments } from '../../utils/portalData';
 
 export const TournamentsSection = ({ onOpenTournamentModal }) => {
   const [activeTab, setActiveTab] = useState('ACTIVE');
+  const [tournaments, setTournaments] = useState(getStoredTournaments());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setTournaments(getStoredTournaments());
+    };
+    window.addEventListener('portal_tournaments_updated', handleUpdate);
+    return () => window.removeEventListener('portal_tournaments_updated', handleUpdate);
+  }, []);
+
+  const activeTournaments = tournaments.filter(t => (t.status || 'ACTIVE').toUpperCase() === 'ACTIVE');
+  const historicTournaments = tournaments.filter(t => (t.status || 'ACTIVE').toUpperCase() === 'HISTORIC' || t.status === 'COMPLETED');
+
+  const displayedTournaments = activeTab === 'ACTIVE' 
+    ? (activeTournaments.length > 0 ? activeTournaments : tournaments)
+    : (historicTournaments.length > 0 ? historicTournaments : tournaments);
 
   return (
     <section id="tournaments" className="w-full mb-8">
@@ -50,7 +67,7 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
                 : 'text-[#64748B] hover:text-[#CBD5E1]'
             }`}
           >
-            ACTIVE
+            ACTIVE ({activeTournaments.length})
           </button>
           <button
             onClick={() => {
@@ -63,63 +80,60 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
                 : 'text-[#64748B] hover:text-[#CBD5E1]'
             }`}
           >
-            HISTORIC
+            HISTORIC ({historicTournaments.length})
           </button>
         </div>
 
         {/* 2-Column Grid: Left Matches + Right Crest Box & Countdown */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           
-          {/* Left Column: Tournament Cards */}
+          {/* Left Column: Dynamic Tournament Cards */}
           <div className="lg:col-span-7 space-y-4">
             
-            {/* Card 1: Active Tournament */}
-            <div className="p-4 sm:p-5 rounded-lg bg-[#11151E] border border-[#1E2536] flex flex-col justify-between">
-              <div className="flex items-center gap-3.5 mb-4">
-                <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#E5C05B]/40 p-0.5 bg-black/60 flex items-center justify-center shrink-0">
-                  <img src="/assets/conqueror_badge.jpg" alt="Crest" className="w-full h-full object-cover rounded" />
-                </div>
-                <div>
-                  <h4 className="font-montserrat font-bold text-sm sm:text-base text-white">
-                    Active Esports Upcoming Tournament
-                  </h4>
-                  <p className="font-rajdhani text-xs text-[#788294] font-medium mt-0.5">
-                    Active 16 — June 19, 2026 • ₹2,50,000 Grand Prize Pool
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  soundFx.playModalOpen();
-                  onOpenTournamentModal?.();
-                }}
-                onMouseEnter={() => soundFx.playHover()}
-                className="w-full py-2.5 rounded-md bg-[#E5C05B] hover:bg-[#F3CF7A] text-[#0A0D12] font-montserrat font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_15px_rgba(229,192,91,0.25)]"
+            {displayedTournaments.map((t, idx) => (
+              <div
+                key={t.id || idx}
+                className="p-4 sm:p-5 rounded-lg bg-[#11151E] border border-[#1E2536] flex flex-col justify-between hover:border-[#E5C05B]/30 transition-all"
               >
-                REGISTER FOR UPCOMING TOURNAMENTS
-              </button>
-            </div>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-[#E5C05B]/40 p-0.5 bg-black/60 flex items-center justify-center shrink-0">
+                      <img src="/assets/conqueror_badge.jpg" alt="Crest" className="w-full h-full object-cover rounded" />
+                    </div>
+                    <div>
+                      <h4 className="font-montserrat font-bold text-sm sm:text-base text-white">
+                        {t.title || 'Official Upcoming Tournament'}
+                      </h4>
+                      <p className="font-rajdhani text-xs text-[#788294] font-medium mt-0.5">
+                        {t.date || 'June 19, 2026'} • <strong className="text-[#E5C05B]">{t.prize || '₹2,50,000 INR'}</strong>
+                      </p>
+                    </div>
+                  </div>
 
-            {/* Card 2: Historic / Secondary Tournament */}
-            <div className="p-4 rounded-lg bg-[#11151E] border border-[#1E2536] flex items-center justify-between">
-              <div className="flex items-center gap-3.5">
-                <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E5C05B]/30 p-0.5 bg-black/40 flex items-center justify-center shrink-0">
-                  <img src="/assets/conqueror_badge.jpg" alt="Crest" className="w-full h-full object-cover rounded" />
+                  <span className="text-[10px] font-montserrat font-bold text-[#E5C05B] px-2.5 py-1 rounded bg-black/40 border border-[#2B3448] shrink-0">
+                    {t.tag || 'BOTSQUADWAR'}
+                  </span>
                 </div>
-                <div>
-                  <h4 className="font-montserrat font-bold text-xs sm:text-sm text-[#E2E8F0]">
-                    Historic Esport Upcoming Tournament
-                  </h4>
-                  <p className="font-rajdhani text-xs text-[#788294]">
-                    Active 16 — June 17, 2026 • Erangel Bot Squad War
-                  </p>
+
+                <div className="flex items-center justify-between text-xs font-mono text-[#788294] mb-3 bg-black/30 p-2.5 rounded-lg border border-[#1A202C]">
+                  <span>Map: <strong className="text-white">{t.map || 'Erangel'}</strong></span>
+                  <span>Format: <strong className="text-teal-400">{t.format || 'Squad War'}</strong></span>
+                  <span>Slots: <strong className="text-[#E5C05B]">{t.slots || '25 Squads Limit'}</strong></span>
                 </div>
+
+                <button
+                  onClick={() => {
+                    soundFx.playModalOpen();
+                    onOpenTournamentModal?.(t);
+                  }}
+                  onMouseEnter={() => soundFx.playHover()}
+                  className="w-full py-2.5 rounded-md bg-[#E5C05B] hover:bg-[#F3CF7A] text-[#0A0D12] font-montserrat font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_15px_rgba(229,192,91,0.25)] flex items-center justify-center gap-1.5"
+                >
+                  <Swords className="w-3.5 h-3.5" />
+                  <span>REGISTER FOR UPCOMING TOURNAMENTS</span>
+                </button>
               </div>
-              <span className="text-[10px] font-montserrat font-bold text-[#E5C05B] px-2.5 py-1 rounded bg-black/40 border border-[#2B3448]">
-                BOTSQUADWAR
-              </span>
-            </div>
+            ))}
 
           </div>
 
@@ -168,3 +182,5 @@ export const TournamentsSection = ({ onOpenTournamentModal }) => {
     </section>
   );
 };
+
+export default TournamentsSection;

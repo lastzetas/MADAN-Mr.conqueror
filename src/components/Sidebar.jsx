@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Trophy, Swords, MessageSquare, BarChart2, Star, Mail, Shield, Crown } from 'lucide-react';
+import { Home, Trophy, Swords, MessageSquare, BarChart2, Mail, Shield, Crown, Vote, Sparkles } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 
 export const Sidebar = ({
@@ -16,8 +16,9 @@ export const Sidebar = ({
     { id: 'trophies', icon: Trophy, label: 'Achievements' },
     { id: 'tournaments', icon: Swords, label: 'Tournaments' },
     { id: 'winners', icon: Shield, label: 'Winners & Hall of Fame' },
+    { id: 'poll', icon: Vote, label: 'Live Fan Poll' },
     { id: 'community', icon: MessageSquare, label: 'Superchat Feed' },
-    { id: 'reviews', icon: Star, label: 'Curated Reviews' },
+    { id: 'sponsors', icon: Sparkles, label: 'Sponsors & Supporters' },
     { id: 'contact', icon: Mail, label: 'Contact & Inquiries' },
   ];
 
