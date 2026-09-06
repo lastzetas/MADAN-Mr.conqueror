@@ -4,7 +4,7 @@ import {
   AlertCircle, Trophy, Swords, Search, ArrowRightLeft,
   FileSpreadsheet, MessageSquare, Flame, CheckCircle2, RotateCcw,
   Sliders, Award, UserCheck, Activity, Wifi, ArrowLeft, Home,
-  Clock, TrendingUp, Sparkles, Cpu, Phone, XCircle, Trash2
+  Clock, TrendingUp, Sparkles, Cpu, Phone, XCircle, Trash2, Copy
 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import {
@@ -18,6 +18,8 @@ import {
 export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToPortal }) => {
   const [activeTab, setActiveTab] = useState('ROSTER');
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [copiedId, setCopiedId] = useState(null);
 
   // Real-time Registrations & Inquiries
   const [rosterTeams, setRosterTeams] = useState(getStoredRegistrations());
@@ -77,6 +79,14 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     }
   };
 
+  const handleCopyIgids = (team) => {
+    const igidsText = team.igids || team.players?.map(p => `${p.name}: ${p.id}`).join(', ') || 'N/A';
+    navigator.clipboard.writeText(igidsText);
+    soundFx.playSuccess();
+    setCopiedId(team.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const handleBroadcast = (e) => {
     e.preventDefault();
     if (!roomId || !roomPassword) return;
@@ -95,13 +105,30 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     setInquiries(updated);
   };
 
-  const filteredTeams = rosterTeams.filter(t =>
-    t.teamName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.captainName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.slot?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.ticketId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.igids?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTeams = rosterTeams.filter(t => {
+    const teamName = t.teamName || t.name || '';
+    const captainName = t.captainName || t.captain || '';
+    const slot = t.slot || '';
+    const ticketId = t.ticketId || '';
+    const igids = t.igids || '';
+    const clanTag = t.clanTag || '';
+
+    const matchesSearch =
+      teamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      captainName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      slot.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticketId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      igids.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      clanTag.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      (statusFilter === 'PENDING' && t.status === 'PENDING') ||
+      (statusFilter === 'VERIFIED' && (t.status === 'VERIFIED' || t.status === 'WHITELISTED')) ||
+      (statusFilter === 'REJECTED' && t.status === 'REJECTED');
+
+    return matchesSearch && matchesStatus;
+  });
 
   const pendingRostersCount = rosterTeams.filter(t => t.status === 'PENDING').length;
   const verifiedCount = rosterTeams.filter(t => t.status === 'VERIFIED' || t.status === 'WHITELISTED').length;
@@ -237,7 +264,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
       {/* Main Dashboard Canvas */}
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 space-y-6">
         
-        {/* TAB 1: MATCH ROSTER & 3-COLUMN TELEMETRY DESK */}
+        {/* TAB 1: MATCH ROSTER & IGID VERIFICATION DESK */}
         {activeTab === 'ROSTER' && (
           <div className="space-y-6">
             
@@ -245,7 +272,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[
                 { label: 'MATCH STATUS', value: 'WAR LIVE', detail: 'Group A • Erangel', tag: 'ROUND 1' },
-                { label: 'REGISTERED TEAMS', value: `${rosterTeams.length} Squads`, detail: `${verifiedCount} Verified Ready`, tag: `${Math.round((verifiedCount / Math.max(1, rosterTeams.length)) * 100)}% READY` },
+                { label: 'REGISTERED SQUADS', value: `${rosterTeams.length} Squads`, detail: `${verifiedCount} Verified Ready`, tag: `${Math.round((verifiedCount / Math.max(1, rosterTeams.length)) * 100)}% READY` },
                 { label: 'AVG SERVER PING', value: '18ms', detail: 'Mumbai Direct Route', tag: 'OPTIMAL' },
                 { label: 'PENDING REVIEWS', value: `${pendingRostersCount} Applications`, detail: 'Awaiting IGID Verification', tag: pendingRostersCount > 0 ? 'ACTION NEEDED' : 'CLEAN' },
               ].map((m, i) => (
@@ -267,145 +294,23 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
               ))}
             </div>
 
-            {/* 3-Column Tablet Layout (Matching Reference Design) */}
+            {/* Live Match Telemetry Strip */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              
-              {/* Left Column (lg:col-span-4): Roster Queue & Verification Feed */}
-              <div className="lg:col-span-4 bg-white border border-[#E2E8F0] rounded-3xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col space-y-4">
+              {/* Telemetry Frag Curve */}
+              <div className="lg:col-span-8 bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between space-y-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-black text-[#0F172A] uppercase tracking-wider">
-                      Match Rosters
-                    </h3>
-                    <p className="text-[10px] text-[#64748B] font-mono">
-                      BGMI character ID anti-cheat verification
-                    </p>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-700 font-mono text-[10px] font-bold">
-                    {verifiedCount}/{rosterTeams.length} OK
-                  </span>
-                </div>
-
-                {/* Search input */}
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="Search squad, captain, slot, ticket ID..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
-                  />
-                </div>
-
-                {/* Team cards list */}
-                <div className="space-y-2.5 overflow-y-auto max-h-[480px] pr-1">
-                  {filteredTeams.map((team) => (
-                    <div
-                      key={team.id}
-                      className="p-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] hover:border-slate-300 transition-all flex flex-col space-y-2 text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                            {team.slot}
-                          </span>
-                          <span className="font-bold text-xs text-[#0F172A] truncate max-w-[130px]">{team.teamName}</span>
-                        </div>
-                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase font-mono ${
-                          team.status === 'VERIFIED' || team.status === 'WHITELISTED'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : team.status === 'REJECTED'
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}>
-                          {team.status}
-                        </span>
-                      </div>
-
-                      <div className="text-[10px] text-[#64748B] font-mono leading-relaxed">
-                        <div>
-                          Captain: <strong className="text-[#334155]">{team.captainName}</strong>
-                          {' '}
-                          <a
-                            href={`https://wa.me/${team.captainPhone?.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-0.5 text-emerald-600 hover:underline ml-1"
-                            title="WhatsApp captain"
-                          >
-                            <Phone className="w-3 h-3" />
-                            {team.captainPhone}
-                          </a>
-                        </div>
-                        <div className="truncate text-[#475569]">IGIDs: {team.igids}</div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1 border-t border-[#E2E8F0]/60">
-                        <span className="text-[9px] font-mono text-emerald-600 font-bold flex items-center gap-1">
-                          <Wifi className="w-3 h-3 text-emerald-500" />
-                          {team.ping}
-                        </span>
-                        
-                        <div className="flex items-center gap-1.5">
-                          {team.status === 'PENDING' ? (
-                            <>
-                              <button
-                                onClick={() => handleVerifySquad(team.id)}
-                                className="px-2.5 py-1 rounded-xl bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-[10px] uppercase transition-colors cursor-pointer"
-                              >
-                                Verify & Pass
-                              </button>
-                              <button
-                                onClick={() => handleRejectSquad(team.id)}
-                                className="px-2 py-1 rounded-xl bg-white hover:bg-rose-50 border border-slate-300 text-slate-700 hover:text-rose-700 font-bold text-[10px] uppercase transition-colors cursor-pointer"
-                              >
-                                Reject
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-emerald-600 text-[10px] flex items-center gap-1 font-bold">
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                              Ready
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Center Column (lg:col-span-5): Frag Velocity Wave Graph & Kill Histogram */}
-              <div className="lg:col-span-5 bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between space-y-4">
-                
-                {/* Graph Header */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] uppercase font-bold text-[#64748B] tracking-wider">
-                        TELEMETRY CURVE
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-[9px] font-mono font-bold">
-                        MATCH 1 VELOCITY
-                      </span>
-                    </div>
-                    <span className="text-xs font-mono text-[#64748B]">Zone 4 / Erangel</span>
-                  </div>
-
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight font-mono">
-                      8,700 PTS
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase font-bold text-[#64748B] tracking-wider">
+                      TELEMETRY CURVE
                     </span>
-                    <span className="text-[11px] font-mono text-teal-600 font-bold flex items-center gap-0.5">
-                      <TrendingUp className="w-3 h-3" />
-                      +14.8% Frag Velocity
+                    <span className="px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-[9px] font-mono font-bold">
+                      MATCH 1 VELOCITY
                     </span>
                   </div>
+                  <span className="text-xs font-mono text-[#64748B]">Zone 4 / Erangel</span>
                 </div>
 
-                {/* Mint/Teal Wave SVG Curve */}
-                <div className="relative w-full h-44 bg-slate-50/60 rounded-2xl p-2 border border-[#E2E8F0] flex items-center justify-center overflow-hidden">
+                <div className="relative w-full h-36 bg-slate-50/60 rounded-2xl p-2 border border-[#E2E8F0] flex items-center justify-center overflow-hidden">
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 400 150" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="adminWaveGradient" x1="0" y1="0" x2="0" y2="1">
@@ -418,18 +323,14 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                       </filter>
                     </defs>
 
-                    {/* Subtle grid lines */}
                     <line x1="0" y1="35" x2="400" y2="35" stroke="#E2E8F0" strokeDasharray="3,3" strokeWidth="1" />
                     <line x1="0" y1="75" x2="400" y2="75" stroke="#E2E8F0" strokeDasharray="3,3" strokeWidth="1" />
                     <line x1="0" y1="115" x2="400" y2="115" stroke="#E2E8F0" strokeDasharray="3,3" strokeWidth="1" />
 
-                    {/* Filled gradient area */}
                     <path
                       d="M 0 130 C 50 120, 80 80, 130 90 C 180 100, 210 40, 260 30 C 310 20, 350 70, 400 50 L 400 150 L 0 150 Z"
                       fill="url(#adminWaveGradient)"
                     />
-
-                    {/* Smooth Mint Wave Line */}
                     <path
                       d="M 0 130 C 50 120, 80 80, 130 90 C 180 100, 210 40, 260 30 C 310 20, 350 70, 400 50"
                       fill="none"
@@ -438,8 +339,6 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                       strokeLinecap="round"
                       filter="url(#adminGlow)"
                     />
-
-                    {/* Peak Marker Tag */}
                     <g transform="translate(260, 30)">
                       <circle r="5.5" fill="#0F172A" stroke="#2DD4BF" strokeWidth="3" />
                       <circle r="2" fill="#FFFFFF" />
@@ -448,56 +347,30 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                         8,700 PTS
                       </text>
                     </g>
-
-                    {/* Data Points */}
                     <circle cx="130" cy="90" r="3.5" fill="#14B8A6" />
                     <circle cx="400" cy="50" r="3.5" fill="#14B8A6" />
                   </svg>
                 </div>
 
-                {/* Kill Distribution Histogram (13 Bars) */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[#64748B]">
-                    <span className="font-bold uppercase">Kill Distribution (Per 2-Min Interval)</span>
-                    <span className="font-bold text-[#0F172A]">64 Total Frags</span>
-                  </div>
-
-                  <div className="flex items-end justify-between gap-1.5 h-16 pt-2 px-1">
-                    {[25, 40, 35, 60, 45, 80, 55, 95, 70, 85, 60, 45, 30].map((val, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          style={{ height: `${val}%` }}
-                          className={`w-full rounded-t-sm transition-all ${
-                            val > 75
-                              ? 'bg-gradient-to-t from-teal-500 to-emerald-400'
-                              : 'bg-slate-200 hover:bg-slate-300'
-                          }`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-[9px] font-mono text-[#94A3B8] pt-1 border-t border-[#F1F5F9]">
-                    <span>0m</span>
-                    <span>5m</span>
-                    <span>10m</span>
-                    <span>15m</span>
-                    <span>20m (End)</span>
-                  </div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-[#64748B]">
+                  <span>Avg Ping: 18ms (Direct Mumbai Node)</span>
+                  <span className="font-bold text-teal-700">64 Total Frags Recorded</span>
                 </div>
-
               </div>
 
-              {/* Right Column (lg:col-span-3): Circular SVG Verification Dial & Dispatch Actions */}
-              <div className="lg:col-span-3 space-y-4">
-                
-                {/* Circular SVG Whitelist & Verification Rate Dial */}
-                <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col items-center text-center space-y-3">
+              {/* Lobby Readiness & Fast Dispatch Actions */}
+              <div className="lg:col-span-4 bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between space-y-4">
+                <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-[#64748B] uppercase font-bold tracking-wider">
-                    LOBBY READINESS
+                    LOBBY READINESS DIAL
                   </span>
+                  <span className="text-[10px] font-mono text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                    {verifiedCount}/{rosterTeams.length} OK
+                  </span>
+                </div>
 
-                  <div className="relative w-28 h-28 flex items-center justify-center">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                       <path
                         className="text-slate-100"
@@ -517,70 +390,254 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                       />
                     </svg>
                     <div className="absolute flex flex-col items-center">
-                      <span className="text-lg font-black text-[#0F172A] font-mono">
+                      <span className="text-sm font-black text-[#0F172A] font-mono">
                         {Math.round((verifiedCount / Math.max(1, rosterTeams.length)) * 100)}%
                       </span>
-                      <span className="text-[8px] text-[#64748B] font-mono">READY</span>
                     </div>
                   </div>
 
-                  <div className="text-center">
-                    <span className="text-xs font-bold text-[#0F172A] block">Group A & B Ready</span>
-                    <span className="text-[10px] text-[#64748B] font-mono">{verifiedCount} of {rosterTeams.length} Verified</span>
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold text-[#0F172A] block">Lobby Whitelist Status</span>
+                    <p className="text-[10px] text-[#64748B] font-mono leading-tight">
+                      {pendingRostersCount > 0 ? `${pendingRostersCount} squads pending review below` : 'All registered squads ready for match'}
+                    </p>
                   </div>
                 </div>
 
-                {/* Quick Dispatch Actions (Dark Pills) */}
-                <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-3">
-                  <span className="text-[10px] font-mono text-[#64748B] uppercase font-bold tracking-wider block">
-                    QUICK DISPATCH
-                  </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      soundFx.playClick();
+                      setActiveTab('LOBBY');
+                    }}
+                    className="py-2 px-2.5 rounded-xl bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-[11px] uppercase flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Radio className="w-3.5 h-3.5 text-teal-400" />
+                    <span>Broadcast</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      soundFx.playClick();
+                      setActiveTab('SCORES');
+                    }}
+                    className="py-2 px-2.5 rounded-xl bg-[#F8FAFC] hover:bg-slate-100 border border-[#CBD5E1] text-[#0F172A] font-bold text-[11px] uppercase flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Award className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Scoring</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => {
-                        soundFx.playClick();
-                        setActiveTab('LOBBY');
-                      }}
-                      className="w-full py-2.5 px-3 rounded-2xl bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-xs uppercase flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Radio className="w-3.5 h-3.5 text-teal-400" />
-                        Broadcast Lobby
-                      </span>
-                      <span className="text-[10px] text-teal-400 font-mono">PUSH</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        soundFx.playClick();
-                        setActiveTab('SCORES');
-                      }}
-                      className="w-full py-2.5 px-3 rounded-2xl bg-[#F8FAFC] hover:bg-slate-100 border border-[#CBD5E1] text-[#0F172A] font-bold text-xs uppercase flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Award className="w-3.5 h-3.5 text-teal-600" />
-                        Scoring Desk
-                      </span>
-                      <span className="text-[10px] text-[#64748B] font-mono">PTS</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        soundFx.playSuccess();
-                        alert('Server ping refreshed: Mumbai (16ms), Chennai (19ms), Delhi (21ms).');
-                      }}
-                      className="w-full py-2.5 px-3 rounded-2xl bg-[#F8FAFC] hover:bg-slate-100 border border-[#CBD5E1] text-[#0F172A] font-bold text-xs uppercase flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <RotateCcw className="w-3.5 h-3.5 text-teal-600" />
-                        Ping Matrix
-                      </span>
-                      <span className="text-[10px] text-emerald-600 font-mono">18ms</span>
-                    </button>
-                  </div>
+            {/* MAIN SQUAD APPLICATIONS & ROSTER DESK */}
+            <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-5">
+              
+              {/* Desk Header & Search */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-[#0F172A] uppercase tracking-wider">
+                    JOIN NOW Squad Registrations & IGID Desk
+                  </h3>
+                  <p className="text-xs text-[#64748B]">
+                    Full player roster, BGMI character ID anti-cheat verification, and WhatsApp captain contact
+                  </p>
                 </div>
 
+                <div className="relative w-full sm:w-80">
+                  <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search squad, captain, slot, ticket, IGID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
+                  />
+                </div>
+              </div>
+
+              {/* Status Filter Chips */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                {[
+                  { id: 'ALL', label: `All Squads (${rosterTeams.length})` },
+                  { id: 'PENDING', label: `Pending Verification (${pendingRostersCount})`, highlight: pendingRostersCount > 0 },
+                  { id: 'VERIFIED', label: `Verified / Whitelisted (${verifiedCount})` },
+                  { id: 'REJECTED', label: `Rejected (${rosterTeams.filter(t => t.status === 'REJECTED').length})` },
+                ].map((chip) => (
+                  <button
+                    key={chip.id}
+                    onClick={() => {
+                      soundFx.playClick();
+                      setStatusFilter(chip.id);
+                    }}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      statusFilter === chip.id
+                        ? 'bg-[#0F172A] text-white'
+                        : chip.highlight
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold'
+                        : 'bg-[#F8FAFC] hover:bg-slate-200 text-[#64748B] border border-[#E2E8F0]'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Detailed Squad Applications Cards */}
+              <div className="space-y-4">
+                {filteredTeams.length === 0 ? (
+                  <div className="text-center py-12 text-[#64748B] text-xs font-mono bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0]">
+                    No squad registrations found matching this search or filter.
+                  </div>
+                ) : (
+                  filteredTeams.map((team) => (
+                    <div
+                      key={team.id}
+                      className="p-4 sm:p-5 rounded-3xl bg-[#F8FAFC] border border-[#E2E8F0] hover:border-slate-300 transition-all flex flex-col space-y-4 shadow-xs"
+                    >
+                      {/* Top Row: Squad Header, Category, and Action Buttons */}
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200 text-xs font-mono">
+                            {team.slot}
+                          </span>
+                          <h4 className="font-extrabold text-sm sm:text-base text-[#0F172A]">
+                            {team.teamName || team.name} {team.clanTag && <span className="text-slate-500 font-mono">[{team.clanTag}]</span>}
+                          </h4>
+                          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800 font-mono font-bold">
+                            🎫 {team.ticketId || team.id}
+                          </span>
+                          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 font-mono font-bold border border-teal-200">
+                            {team.category || 'Season 7 War Grand Finale'}
+                          </span>
+                          <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase font-mono ${
+                            team.status === 'WHITELISTED' || team.status === 'VERIFIED'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : team.status === 'REJECTED'
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {team.status}
+                          </span>
+                          {team.ping && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono font-bold flex items-center gap-1 border border-emerald-200">
+                              <Wifi className="w-3 h-3 text-emerald-500" />
+                              {team.ping}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Approval Buttons */}
+                        <div className="flex items-center gap-2 self-end lg:self-center shrink-0">
+                          {team.status === 'PENDING' ? (
+                            <>
+                              <button
+                                onClick={() => handleVerifySquad(team.id)}
+                                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Verify & Pass</span>
+                              </button>
+                              <button
+                                onClick={() => handleRejectSquad(team.id)}
+                                className="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-300 text-[#475569] hover:text-rose-600 font-bold text-xs uppercase transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          ) : team.status === 'VERIFIED' || team.status === 'WHITELISTED' ? (
+                            <button
+                              onClick={() => handleRejectSquad(team.id)}
+                              className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-slate-300 hover:border-amber-300 text-[#475569] hover:text-amber-700 font-semibold text-xs uppercase cursor-pointer"
+                            >
+                              Revoke Pass
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleVerifySquad(team.id)}
+                              className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs uppercase cursor-pointer"
+                            >
+                              Re-Verify
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => handleCopyIgids(team)}
+                            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-[#334155] font-semibold text-xs flex items-center gap-1 cursor-pointer"
+                            title="Copy all player IGIDs for room invite/verification"
+                          >
+                            <Copy className="w-3 h-3 text-teal-600" />
+                            <span>{copiedId === team.id ? 'Copied!' : 'Copy IGIDs'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteSquad(team.id)}
+                            className="p-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-300 text-slate-400 hover:text-rose-600 cursor-pointer transition-colors"
+                            title="Delete squad entry"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Middle: Captain Contact Details & Metadata */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono bg-white p-3.5 rounded-2xl border border-[#E2E8F0]">
+                        <div>
+                          <span className="text-[#64748B] block text-[10px] uppercase font-bold">Squad Captain:</span>
+                          <strong className="text-[#0F172A] text-sm">{team.captainName || team.captain}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[#64748B] block text-[10px] uppercase font-bold">WhatsApp Contact:</span>
+                          <a
+                            href={`https://wa.me/${(team.captainPhone || team.phone)?.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold hover:underline"
+                            title="Click to message captain on WhatsApp"
+                          >
+                            <Phone className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>{team.captainPhone || team.phone}</span>
+                          </a>
+                        </div>
+                        <div>
+                          <span className="text-[#64748B] block text-[10px] uppercase font-bold">Discord / Time:</span>
+                          <span className="text-[#334155]">{team.captainDiscord || 'N/A'} • {team.registeredAt}</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom: 4-Player Roster & IGIDs Breakdown Grid */}
+                      <div>
+                        <span className="text-[10px] font-mono text-[#64748B] uppercase font-bold block mb-2">
+                          Registered 4-Player Starting Roster & In-Game IDs (IGIDs):
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
+                          {(team.players && team.players.length > 0 ? team.players : [
+                            { name: team.captainName || 'Player 1', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'Captain / IGL' },
+                            { name: 'Player 2', id: team.igids?.split(',')[1]?.trim() || 'N/A', role: 'Assaulter' },
+                            { name: 'Player 3', id: team.igids?.split(',')[2]?.trim() || 'N/A', role: 'Fragger' },
+                            { name: 'Player 4', id: team.igids?.split(',')[3]?.trim() || 'N/A', role: 'Support' }
+                          ]).map((player, idx) => (
+                            <div key={idx} className="p-2.5 rounded-xl bg-white border border-[#E2E8F0] flex flex-col justify-between">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-[#0F172A] truncate">{player.name}</span>
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-[#475569]">{player.role || `P${idx+1}`}</span>
+                              </div>
+                              <div className="mt-1 text-[11px] text-teal-700 font-bold">
+                                IGID: {player.id}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {team.substitute && (team.substitute.name || team.substitute.id) && (
+                          <div className="mt-2 text-[11px] font-mono text-[#64748B] bg-slate-50 p-2 rounded-xl border border-slate-200">
+                            <strong>Substitute Player:</strong> {team.substitute.name || 'Sub'} (IGID: {team.substitute.id || 'N/A'})
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ))
+                )}
               </div>
 
             </div>

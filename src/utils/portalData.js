@@ -2,19 +2,22 @@
 // Persisted in localStorage and synchronizes across all components in real-time
 
 const STORAGE_KEYS = {
-  REGISTRATIONS: 'madan_portal_registrations_v2',
-  INQUIRIES: 'madan_portal_inquiries_v2',
-  SEASON_STATE: 'madan_portal_season_state_v2'
+  REGISTRATIONS: 'madan_portal_registrations_v3',
+  INQUIRIES: 'madan_portal_inquiries_v3',
+  SEASON_STATE: 'madan_portal_season_state_v3'
 };
 
-// Initial Seed Data
+// Initial Seed Data with complete player roster fields
 const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-101',
     teamName: 'OG-BTS (OG Battle Squad)',
+    name: 'OG-BTS (OG Battle Squad)',
     clanTag: 'OG',
     captainName: 'OG_Viper',
+    captain: 'OG_Viper',
     captainPhone: '+91 98401 23456',
+    phone: '+91 98401 23456',
     captainDiscord: 'viper#0001',
     slot: 'SLOT-01',
     ticketId: 'MC-819201',
@@ -27,6 +30,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'WHITELISTED',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '15 mins ago',
     matchGroup: 'Group A',
     ping: '18ms',
@@ -37,9 +41,12 @@ const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-102',
     teamName: 'Tamil Titans Esports',
+    name: 'Tamil Titans Esports',
     clanTag: 'TTN',
     captainName: 'TTN_Vijay',
+    captain: 'TTN_Vijay',
     captainPhone: '+91 94441 56789',
+    phone: '+91 94441 56789',
     captainDiscord: 'vijay#9921',
     slot: 'SLOT-02',
     ticketId: 'MC-729104',
@@ -52,6 +59,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'WHITELISTED',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '30 mins ago',
     matchGroup: 'Group A',
     ping: '22ms',
@@ -62,9 +70,12 @@ const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-103',
     teamName: 'Team Soul Esports',
+    name: 'Team Soul Esports',
     clanTag: 'SOUL',
     captainName: 'Soul_Mortal',
+    captain: 'Soul_Mortal',
     captainPhone: '+91 98840 11223',
+    phone: '+91 98840 11223',
     captainDiscord: 'mortal#0007',
     slot: 'SLOT-03',
     ticketId: 'MC-902194',
@@ -77,6 +88,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'WHITELISTED',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '45 mins ago',
     matchGroup: 'Group A',
     ping: '19ms',
@@ -87,9 +99,12 @@ const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-104',
     teamName: 'GodLike Arena',
+    name: 'GodLike Arena',
     clanTag: 'GODL',
     captainName: 'GodL_Jonathan',
+    captain: 'GodL_Jonathan',
     captainPhone: '+91 99620 44556',
+    phone: '+91 99620 44556',
     captainDiscord: 'jonathan#1010',
     slot: 'SLOT-04',
     ticketId: 'MC-482019',
@@ -102,6 +117,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'PENDING',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '1 hour ago',
     matchGroup: 'Group B',
     ping: '25ms',
@@ -112,9 +128,12 @@ const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-105',
     teamName: 'Team 8Bit Pro',
+    name: 'Team 8Bit Pro',
     clanTag: '8BIT',
     captainName: '8Bit_Juicy',
+    captain: '8Bit_Juicy',
     captainPhone: '+91 97900 77889',
+    phone: '+91 97900 77889',
     captainDiscord: 'juicy#8888',
     slot: 'SLOT-05',
     ticketId: 'MC-391029',
@@ -127,6 +146,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'WHITELISTED',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '2 hours ago',
     matchGroup: 'Group B',
     ping: '20ms',
@@ -137,9 +157,12 @@ const INITIAL_REGISTRATIONS = [
   {
     id: 'SQ-106',
     teamName: 'Hydra Clan Alpha',
+    name: 'Hydra Clan Alpha',
     clanTag: 'HYDRA',
     captainName: 'Hydra_Alpha',
+    captain: 'Hydra_Alpha',
     captainPhone: '+91 98412 33445',
+    phone: '+91 98412 33445',
     captainDiscord: 'alpha#7777',
     slot: 'SLOT-06',
     ticketId: 'MC-192049',
@@ -152,6 +175,7 @@ const INITIAL_REGISTRATIONS = [
     ],
     category: 'Season 7 War Grand Finale',
     status: 'PENDING',
+    source: 'JOIN NOW Registration Portal',
     registeredAt: '3 hours ago',
     matchGroup: 'Group B',
     ping: '28ms',
@@ -202,14 +226,19 @@ export const getStoredRegistrations = () => {
       localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(INITIAL_REGISTRATIONS));
       return INITIAL_REGISTRATIONS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(INITIAL_REGISTRATIONS));
+      return INITIAL_REGISTRATIONS;
+    }
+    return parsed;
   } catch (err) {
     console.error('Failed to load registrations:', err);
     return INITIAL_REGISTRATIONS;
   }
 };
 
-// 2. Submit New Registration from Public Portal
+// 2. Submit New Registration from Public Portal ("JOIN NOW" Action)
 export const submitTournamentRegistration = (data) => {
   const current = getStoredRegistrations();
   
@@ -228,29 +257,33 @@ export const submitTournamentRegistration = (data) => {
   ].filter(Boolean).join(', ');
 
   const playersList = [
-    { name: data.player1Name || data.captainName, id: data.player1Id, role: 'Captain / IGL' },
-    { name: data.player2Name || 'Player 2', id: data.player2Id, role: 'Assaulter' },
-    { name: data.player3Name || 'Player 3', id: data.player3Id, role: 'Fragger' },
-    { name: data.player4Name || 'Player 4', id: data.player4Id, role: 'Support' },
+    { name: data.player1Name || data.captainName || 'Player 1', id: data.player1Id || 'N/A', role: 'Captain / IGL' },
+    { name: data.player2Name || 'Player 2', id: data.player2Id || 'N/A', role: 'Assaulter' },
+    { name: data.player3Name || 'Player 3', id: data.player3Id || 'N/A', role: 'Fragger' },
+    { name: data.player4Name || 'Player 4', id: data.player4Id || 'N/A', role: 'Support' },
   ];
 
-  if (data.subName && data.subId) {
-    playersList.push({ name: data.subName, id: data.subId, role: 'Substitute' });
+  if (data.subName || data.subId) {
+    playersList.push({ name: data.subName || 'Substitute', id: data.subId || 'N/A', role: 'Substitute' });
   }
 
   const newSquad = {
     id: genId,
     teamName: data.teamName || 'Custom Squad',
+    name: data.teamName || 'Custom Squad',
     clanTag: data.clanTag || '',
     captainName: data.captainName || 'Anonymous Captain',
+    captain: data.captainName || 'Anonymous Captain',
     captainPhone: data.captainPhone || '+91 99999 00000',
-    captainDiscord: data.captainDiscord || '',
+    phone: data.captainPhone || '+91 99999 00000',
+    captainDiscord: data.captainDiscord || 'N/A',
     slot: slotFormatted,
     ticketId: genTicket,
     igids: igidList || '5001234, 5005678',
     players: playersList,
     category: data.category || 'Season 7 War Grand Finale',
-    status: 'PENDING', // Submissions enter as PENDING for admin review
+    status: 'PENDING', // Enters PENDING state for Admin review
+    source: 'JOIN NOW Registration Portal',
     registeredAt: 'Just now',
     matchGroup: randomSlotNum % 2 === 0 ? 'Group A' : 'Group B',
     ping: `${Math.floor(Math.random() * 12) + 16}ms`,
@@ -266,7 +299,7 @@ export const submitTournamentRegistration = (data) => {
     console.error('Error saving registration:', e);
   }
 
-  // Notify all open admin dashboards / components
+  // Dispatch both custom event and trigger storage event
   window.dispatchEvent(new CustomEvent('portal_registrations_updated', { detail: newSquad }));
 
   return {
@@ -314,7 +347,12 @@ export const getStoredInquiries = () => {
       localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(INITIAL_INQUIRIES));
       return INITIAL_INQUIRIES;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(INITIAL_INQUIRIES));
+      return INITIAL_INQUIRIES;
+    }
+    return parsed;
   } catch (err) {
     console.error('Failed to load inquiries:', err);
     return INITIAL_INQUIRIES;
