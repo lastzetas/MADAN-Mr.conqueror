@@ -12,6 +12,8 @@ import {
   getStoredRegistrations,
   updateRegistrationStatus,
   deleteRegistration,
+  clearAllRegistrations,
+  subscribeToLivePortalUpdates,
   getStoredInquiries,
   resolveInquiry
 } from '../utils/portalData';
@@ -26,24 +28,21 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
   const [teams, setTeams] = useState(getStoredRegistrations());
   const [inquiries, setInquiries] = useState(getStoredInquiries());
 
-  // Subscribe to real-time events from public portal registrations
+  // Connect to Zero-Latency Live Subscription Stream (SSE + Cloud + Local)
   useEffect(() => {
-    const handleRegistrationsUpdate = () => {
-      setTeams(getStoredRegistrations());
-    };
+    const unsubscribe = subscribeToLivePortalUpdates((updatedList) => {
+      setTeams(updatedList);
+    });
 
     const handleInquiriesUpdate = () => {
       setInquiries(getStoredInquiries());
     };
 
-    window.addEventListener('portal_registrations_updated', handleRegistrationsUpdate);
     window.addEventListener('portal_inquiries_updated', handleInquiriesUpdate);
-    window.addEventListener('storage', handleRegistrationsUpdate);
 
     return () => {
-      window.removeEventListener('portal_registrations_updated', handleRegistrationsUpdate);
+      unsubscribe();
       window.removeEventListener('portal_inquiries_updated', handleInquiriesUpdate);
-      window.removeEventListener('storage', handleRegistrationsUpdate);
     };
   }, []);
 
@@ -264,13 +263,17 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
         {activeTab === 'TEAMS' && (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-6">
             
-            {/* Header & Filter Controls */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                     {/* Desk Header & Filter Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-black text-sm sm:text-base text-[#0F172A] uppercase">
                     JOIN NOW Applications & Squad Whitelist Desk
                   </h3>
+                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    LIVE ZERO-LATENCY FEED
+                  </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-700 font-mono text-[10px] font-bold">
                     {whitelistedCount}/{teams.length} WHITELISTED
                   </span>
@@ -280,16 +283,33 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                 </p>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative w-full md:w-80">
-                <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search squad, captain, slot, ticket ID, IGID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
-                />
+              {/* Search Bar & Reset */}
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-72">
+                  <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search squad, captain, slot, ticket ID, IGID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
+                  />
+                </div>
+
+                {teams.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to reset and clear all squad registrations?')) {
+                        soundFx.playClick();
+                        clearAllRegistrations();
+                      }
+                    }}
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 text-[10px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap border border-slate-200 hover:border-rose-200"
+                    title="Clear all squad registrations"
+                  >
+                    Clear Queue
+                  </button>
+                )}
               </div>
             </div>
 
@@ -323,8 +343,22 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
             {/* Detailed Squad Applications Cards */}
             <div className="space-y-4">
               {filteredTeams.length === 0 ? (
-                <div className="text-center py-12 text-[#64748B] text-xs font-mono bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0]">
-                  No squad registrations found matching this search or filter.
+                <div className="text-center py-16 px-4 bg-[#F8FAFC] rounded-3xl border border-[#E2E8F0] space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center mx-auto shadow-xs">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <h4 className="font-extrabold text-sm text-[#0F172A] uppercase">
+                    {searchQuery || statusFilter !== 'ALL' ? 'No Matching Squads Found' : 'No Squad Applications in Queue'}
+                  </h4>
+                  <p className="text-xs text-[#64748B] max-w-md mx-auto font-mono">
+                    {searchQuery || statusFilter !== 'ALL'
+                      ? 'Try clearing your search query or filter chips above.'
+                      : 'All demo data cleared. When any squad registers via the "JOIN NOW" button on the website, their complete 4-player roster and character IGIDs will appear here in real time with zero latency.'}
+                  </p>
+                  <div className="inline-flex items-center gap-2 text-[10px] font-mono text-emerald-700 font-bold pt-1 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>LIVE ZERO-LATENCY STREAM CONNECTED</span>
+                  </div>
                 </div>
               ) : (
                 filteredTeams.map((team) => (

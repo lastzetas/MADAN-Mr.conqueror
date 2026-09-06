@@ -11,6 +11,8 @@ import {
   getStoredRegistrations,
   updateRegistrationStatus,
   deleteRegistration,
+  clearAllRegistrations,
+  subscribeToLivePortalUpdates,
   getStoredInquiries,
   resolveInquiry
 } from '../utils/portalData';
@@ -25,21 +27,20 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
   const [rosterTeams, setRosterTeams] = useState(getStoredRegistrations());
   const [inquiries, setInquiries] = useState(getStoredInquiries());
 
-  // Listen to portal registration and inquiry updates
+  // Connect to Zero-Latency Live Subscription Stream (SSE + Cloud + Local)
   useEffect(() => {
-    const handleRegistrationsUpdate = () => {
-      setRosterTeams(getStoredRegistrations());
-    };
+    const unsubscribe = subscribeToLivePortalUpdates((updatedList) => {
+      setRosterTeams(updatedList);
+    });
 
     const handleInquiriesUpdate = () => {
       setInquiries(getStoredInquiries());
     };
 
-    window.addEventListener('portal_registrations_updated', handleRegistrationsUpdate);
     window.addEventListener('portal_inquiries_updated', handleInquiriesUpdate);
 
     return () => {
-      window.removeEventListener('portal_registrations_updated', handleRegistrationsUpdate);
+      unsubscribe();
       window.removeEventListener('portal_inquiries_updated', handleInquiriesUpdate);
     };
   }, []);
@@ -435,23 +436,46 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
               {/* Desk Header & Search */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-sm sm:text-base font-black text-[#0F172A] uppercase tracking-wider">
-                    JOIN NOW Squad Registrations & IGID Desk
-                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm sm:text-base font-black text-[#0F172A] uppercase tracking-wider">
+                      JOIN NOW Squad Registrations & IGID Desk
+                    </h3>
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      LIVE ZERO-LATENCY FEED
+                    </span>
+                  </div>
                   <p className="text-xs text-[#64748B]">
                     Full player roster, BGMI character ID anti-cheat verification, and WhatsApp captain contact
                   </p>
                 </div>
 
-                <div className="relative w-full sm:w-80">
-                  <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="Search squad, captain, slot, ticket, IGID..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
-                  />
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:w-72">
+                    <Search className="w-3.5 h-3.5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search squad, captain, slot, ticket, IGID..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
+                    />
+                  </div>
+
+                  {rosterTeams.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to reset and clear all squad registrations?')) {
+                          soundFx.playClick();
+                          clearAllRegistrations();
+                        }
+                      }}
+                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 text-[10px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap border border-slate-200 hover:border-rose-200"
+                      title="Clear all squad registrations"
+                    >
+                      Clear Queue
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -485,8 +509,22 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
               {/* Detailed Squad Applications Cards */}
               <div className="space-y-4">
                 {filteredTeams.length === 0 ? (
-                  <div className="text-center py-12 text-[#64748B] text-xs font-mono bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0]">
-                    No squad registrations found matching this search or filter.
+                  <div className="text-center py-16 px-4 bg-[#F8FAFC] rounded-3xl border border-[#E2E8F0] space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center mx-auto shadow-xs">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <h4 className="font-extrabold text-sm text-[#0F172A] uppercase">
+                      {searchQuery || statusFilter !== 'ALL' ? 'No Matching Squads Found' : 'No Squad Registrations in Queue'}
+                    </h4>
+                    <p className="text-xs text-[#64748B] max-w-md mx-auto font-mono">
+                      {searchQuery || statusFilter !== 'ALL'
+                        ? 'Try clearing your search query or filter chips above.'
+                        : 'All demo data cleared. When any squad registers via the "JOIN NOW" button on the website, their complete 4-player roster and character IGIDs will appear here in real time with zero latency.'}
+                    </p>
+                    <div className="inline-flex items-center gap-2 text-[10px] font-mono text-emerald-700 font-bold pt-1 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>LIVE ZERO-LATENCY STREAM CONNECTED</span>
+                    </div>
                   </div>
                 ) : (
                   filteredTeams.map((team) => (
