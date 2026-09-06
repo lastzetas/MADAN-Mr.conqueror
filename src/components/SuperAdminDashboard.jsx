@@ -182,20 +182,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
               <span>Back to Portal</span>
             </button>
 
-            {onSwitchToAdmin && (
-              <button
-                onClick={() => {
-                  soundFx.playClick();
-                  onSwitchToAdmin();
-                }}
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-[#CBD5E1] text-[#334155] text-xs font-semibold transition-all cursor-pointer shadow-sm hover:shadow"
-                title="Switch to Match Ops View"
-              >
-                <ArrowRightLeft className="w-3.5 h-3.5 text-teal-600" />
-                <span>Admin View</span>
-              </button>
-            )}
-
+            {/* Logout Button */}
             <button
               onClick={() => {
                 soundFx.playClick();

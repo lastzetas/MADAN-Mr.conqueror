@@ -184,21 +184,6 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
               <span>Back to Portal</span>
             </button>
 
-            {/* Switch to Super Admin (if authorized) */}
-            {user?.role === 'SUPER_ADMIN' && onSwitchToSuperAdmin && (
-              <button
-                onClick={() => {
-                  soundFx.playClick();
-                  onSwitchToSuperAdmin();
-                }}
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-100 border border-[#CBD5E1] text-[#334155] text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow"
-                title="Switch to Super Admin View"
-              >
-                <ArrowRightLeft className="w-3.5 h-3.5 text-teal-600" />
-                <span>Super Admin</span>
-              </button>
-            )}
-
             {/* Logout Button */}
             <button
               onClick={() => {
