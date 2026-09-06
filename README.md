@@ -30,7 +30,7 @@
   - Neumorphic 3-column tablet layout with mint frag velocity wave SVG curve and kill distribution histogram.
 
 ### 🛡️ Match Operations Desk (Ops Level 5)
-- **Email**: `admin@madan.gg`
+- **Email**: `admin@madan.in`
 - **Capabilities**:
   - Anti-cheat IGID verification desk.
   - Live match scoring desk with points publication.

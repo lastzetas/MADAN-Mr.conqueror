@@ -135,7 +135,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                 )}
               </div>
               <p className="text-[11px] text-[#64748B] font-mono">
-                {user?.email || 'admin@madan.gg'} • JWT: HS256 Verified
+                {user?.email || 'admin@madan.in'} • JWT: HS256 Verified
               </p>
             </div>
           </div>

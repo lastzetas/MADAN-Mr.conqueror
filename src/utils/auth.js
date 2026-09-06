@@ -4,7 +4,7 @@ const PASSWORD_SALT = 'madan_conqueror_esports_2026_salt';
 const SUPER_ADMIN_EMAIL = 'lastzetas@gmail.com';
 const SUPER_ADMIN_HASH = '00db580ce2193b15e1a5b739396182477dfac069abc15a85cd394da90415545e'; // Hackler@21
 
-const ADMIN_EMAIL = 'admin@madan.gg';
+const ADMIN_EMAIL = 'admin@madan.in';
 const ADMIN_HASH = 'ce028ff1dd39e85c4a6334d2a88bca9de49938790b38cced55a619c1ea6fc3bd'; // Admin@2026
 
 const JWT_SECRET_SALT = 'madan_jwt_secret_key_9fc8e5d1_2026';

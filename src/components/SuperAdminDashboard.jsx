@@ -46,7 +46,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
   // Admins List
   const [adminsList, setAdminsList] = useState([
     { id: 1, email: 'lastzetas@gmail.com', name: 'Last Zetas', role: 'SUPER_ADMIN', level: 'Level 10 (Root)', status: 'ACTIVE', lastActive: 'Now' },
-    { id: 2, email: 'admin@madan.gg', name: 'Match Ops Lead', role: 'ADMIN', level: 'Level 5 (Ops)', status: 'ACTIVE', lastActive: '14 mins ago' },
+    { id: 2, email: 'admin@madan.in', name: 'Match Ops Lead', role: 'ADMIN', level: 'Level 5 (Ops)', status: 'ACTIVE', lastActive: '14 mins ago' },
     { id: 3, email: 'anticheat@madan.gg', name: 'Kamo (Anti-Cheat Mod)', role: 'MODERATOR', level: 'Level 3 (Security)', status: 'ACTIVE', lastActive: '1 hour ago' },
   ]);
 
