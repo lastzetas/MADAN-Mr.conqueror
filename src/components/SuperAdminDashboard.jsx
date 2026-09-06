@@ -21,6 +21,7 @@ import {
   deleteTournament,
   getStoredHallOfFame,
   saveHallOfFame,
+  resetHallOfFameToDefault,
   getStoredPolls,
   savePoll,
   getStoredSponsors,
@@ -111,11 +112,11 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
   const [broadcastSavedNotice, setBroadcastSavedNotice] = useState(false);
 
   // Hall of Fame temporary edit buffer
-  const [hofEditBuffer, setHofEditBuffer] = useState(hallOfFame[hofFormat] || []);
+  const [hofEditBuffer, setHofEditBuffer] = useState(() => getStoredHallOfFame('SQUAD'));
 
   useEffect(() => {
-    setHofEditBuffer(hallOfFame[hofFormat] || []);
-  }, [hofFormat, hallOfFame]);
+    setHofEditBuffer(getStoredHallOfFame(hofFormat));
+  }, [hofFormat]);
 
   // Connect to Live Subscription Stream (SSE + Cloud + Local)
   useEffect(() => {
@@ -185,16 +186,38 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
 
   const handleHofCellChange = (index, field, value) => {
     const updated = [...hofEditBuffer];
+    const isNum = ['wwcd', 'kills', 'placementPts', 'totalPts', 'total', 'rank'].includes(field);
+    const cleanVal = isNum ? (Number(value) || 0) : value;
+
     updated[index] = {
       ...updated[index],
-      [field]: field === 'kills' || field === 'placementPts' || field === 'wwcd' || field === 'total'
-        ? Number(value) || 0
-        : value
+      [field]: cleanVal
     };
+
+    if (field === 'teamName') {
+      updated[index].name = value;
+    } else if (field === 'name') {
+      updated[index].teamName = value;
+    }
+
     if (field === 'kills' || field === 'placementPts') {
-      updated[index].total = (updated[index].kills || 0) + (updated[index].placementPts || 0);
+      const calcTotal = (Number(updated[index].kills) || 0) + (Number(updated[index].placementPts) || 0);
+      updated[index].total = calcTotal;
+      updated[index].totalPts = calcTotal;
     }
     setHofEditBuffer(updated);
+  };
+
+  const handleResetHof = () => {
+    if (window.confirm(`Reset ${hofFormat} Top 10 to official default standings?`)) {
+      soundFx.playClick();
+      const updated = resetHallOfFameToDefault(hofFormat);
+      if (updated && updated[hofFormat]) {
+        setHofEditBuffer(updated[hofFormat]);
+      } else {
+        setHofEditBuffer(getStoredHallOfFame(hofFormat));
+      }
+    }
   };
 
   // Tournaments Handler
@@ -799,6 +822,15 @@ Slot: ${result.team.slot}`);
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    onClick={handleResetHof}
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase flex items-center gap-1 cursor-pointer transition-all border border-slate-300"
+                    title="Reset to default 10 rankings"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset Default</span>
+                  </button>
 
                   <button
                     onClick={handleSaveHof}

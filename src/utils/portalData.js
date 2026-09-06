@@ -572,70 +572,131 @@ export const deleteTournament = (id) => {
 
 const INITIAL_HALL_OF_FAME = {
   SQUAD: [
-    { rank: 1, name: 'Soul Esports', wwcd: 4, kills: 68, placementPts: 52, totalPts: 120, badge: '👑 CHAMPION' },
-    { rank: 2, name: 'GodLike Esports', wwcd: 3, kills: 62, placementPts: 44, totalPts: 106, badge: '🥈 RUNNER UP' },
-    { rank: 3, name: 'Team Tamil Kings', wwcd: 2, kills: 54, placementPts: 38, totalPts: 92, badge: '🥉 2ND RUNNER UP' },
-    { rank: 4, name: 'Madan Conqueror Elite', wwcd: 2, kills: 48, placementPts: 36, totalPts: 84, badge: '⭐ TOP 4' },
-    { rank: 5, name: 'Chennai Assassins', wwcd: 1, kills: 45, placementPts: 32, totalPts: 77, badge: 'TOP 5' },
-    { rank: 6, name: 'Madurai Titans', wwcd: 1, kills: 40, placementPts: 28, totalPts: 68, badge: 'TOP 6' },
-    { rank: 7, name: 'Coimbatore Cyclones', wwcd: 1, kills: 38, placementPts: 24, totalPts: 62, badge: 'TOP 7' },
-    { rank: 8, name: 'Trichy Reapers', wwcd: 0, kills: 34, placementPts: 22, totalPts: 56, badge: 'TOP 8' },
-    { rank: 9, name: 'Salem Strikers', wwcd: 0, kills: 30, placementPts: 18, totalPts: 48, badge: 'TOP 9' },
-    { rank: 10, name: 'Vellore Vipers', wwcd: 0, kills: 26, placementPts: 16, totalPts: 42, badge: 'TOP 10' },
+    { rank: 1, name: 'Soul Esports', teamName: 'Soul Esports', clanTag: 'SOUL', wwcd: 4, kills: 68, placementPts: 52, totalPts: 120, total: 120, badge: '👑 CHAMPION' },
+    { rank: 2, name: 'GodLike Esports', teamName: 'GodLike Esports', clanTag: 'GODL', wwcd: 3, kills: 62, placementPts: 44, totalPts: 106, total: 106, badge: '🥈 RUNNER UP' },
+    { rank: 3, name: 'Team Tamil Kings', teamName: 'Team Tamil Kings', clanTag: 'TTK', wwcd: 2, kills: 54, placementPts: 38, totalPts: 92, total: 92, badge: '🥉 2ND RUNNER UP' },
+    { rank: 4, name: 'Madan Conqueror Elite', teamName: 'Madan Conqueror Elite', clanTag: 'MCE', wwcd: 2, kills: 48, placementPts: 36, totalPts: 84, total: 84, badge: '⭐ TOP 4' },
+    { rank: 5, name: 'Chennai Assassins', teamName: 'Chennai Assassins', clanTag: 'CA', wwcd: 1, kills: 45, placementPts: 32, totalPts: 77, total: 77, badge: 'TOP 5' },
+    { rank: 6, name: 'Madurai Titans', teamName: 'Madurai Titans', clanTag: 'MT', wwcd: 1, kills: 40, placementPts: 28, totalPts: 68, total: 68, badge: 'TOP 6' },
+    { rank: 7, name: 'Coimbatore Cyclones', teamName: 'Coimbatore Cyclones', clanTag: 'CC', wwcd: 1, kills: 38, placementPts: 24, totalPts: 62, total: 62, badge: 'TOP 7' },
+    { rank: 8, name: 'Trichy Reapers', teamName: 'Trichy Reapers', clanTag: 'TR', wwcd: 0, kills: 34, placementPts: 22, totalPts: 56, total: 56, badge: 'TOP 8' },
+    { rank: 9, name: 'Salem Strikers', teamName: 'Salem Strikers', clanTag: 'SS', wwcd: 0, kills: 30, placementPts: 18, totalPts: 48, total: 48, badge: 'TOP 9' },
+    { rank: 10, name: 'Vellore Vipers', teamName: 'Vellore Vipers', clanTag: 'VV', wwcd: 0, kills: 26, placementPts: 16, totalPts: 42, total: 42, badge: 'TOP 10' },
   ],
   DUO: [
-    { rank: 1, name: 'Madan & Venom Duo', wwcd: 5, kills: 46, placementPts: 40, totalPts: 86, badge: '👑 DUO KINGS' },
-    { rank: 2, name: 'Sniper Duo TN', wwcd: 3, kills: 42, placementPts: 34, totalPts: 76, badge: '🥈 RUNNER UP' },
-    { rank: 3, name: 'Delta Duo Force', wwcd: 3, kills: 38, placementPts: 30, totalPts: 68, badge: '🥉 3RD PLACE' },
-    { rank: 4, name: 'Alpha Striker 2', wwcd: 2, kills: 35, placementPts: 28, totalPts: 63, badge: 'TOP 4' },
-    { rank: 5, name: 'Phoenix Duo', wwcd: 2, kills: 32, placementPts: 26, totalPts: 58, badge: 'TOP 5' },
-    { rank: 6, name: 'Shadow Duo', wwcd: 1, kills: 28, placementPts: 24, totalPts: 52, badge: 'TOP 6' },
-    { rank: 7, name: 'Falcon Duo', wwcd: 1, kills: 25, placementPts: 20, totalPts: 45, badge: 'TOP 7' },
-    { rank: 8, name: 'Apex Hunters', wwcd: 1, kills: 22, placementPts: 18, totalPts: 40, badge: 'TOP 8' },
-    { rank: 9, name: 'Stealth Killers', wwcd: 0, kills: 20, placementPts: 16, totalPts: 36, badge: 'TOP 9' },
-    { rank: 10, name: 'Storm Duo', wwcd: 0, kills: 18, placementPts: 14, totalPts: 32, badge: 'TOP 10' },
+    { rank: 1, name: 'Madan & Venom Duo', teamName: 'Madan & Venom Duo', clanTag: 'MV', wwcd: 5, kills: 46, placementPts: 40, totalPts: 86, total: 86, badge: '👑 DUO KINGS' },
+    { rank: 2, name: 'Sniper Duo TN', teamName: 'Sniper Duo TN', clanTag: 'SDTN', wwcd: 3, kills: 42, placementPts: 34, totalPts: 76, total: 76, badge: '🥈 RUNNER UP' },
+    { rank: 3, name: 'Delta Duo Force', teamName: 'Delta Duo Force', clanTag: 'DDF', wwcd: 3, kills: 38, placementPts: 30, totalPts: 68, total: 68, badge: '🥉 3RD PLACE' },
+    { rank: 4, name: 'Alpha Striker 2', teamName: 'Alpha Striker 2', clanTag: 'AS2', wwcd: 2, kills: 35, placementPts: 28, totalPts: 63, total: 63, badge: 'TOP 4' },
+    { rank: 5, name: 'Phoenix Duo', teamName: 'Phoenix Duo', clanTag: 'PHX', wwcd: 2, kills: 32, placementPts: 26, totalPts: 58, total: 58, badge: 'TOP 5' },
+    { rank: 6, name: 'Shadow Duo', teamName: 'Shadow Duo', clanTag: 'SHD', wwcd: 1, kills: 28, placementPts: 24, totalPts: 52, total: 52, badge: 'TOP 6' },
+    { rank: 7, name: 'Falcon Duo', teamName: 'Falcon Duo', clanTag: 'FLC', wwcd: 1, kills: 25, placementPts: 20, totalPts: 45, total: 45, badge: 'TOP 7' },
+    { rank: 8, name: 'Apex Hunters', teamName: 'Apex Hunters', clanTag: 'APX', wwcd: 1, kills: 22, placementPts: 18, totalPts: 40, total: 40, badge: 'TOP 8' },
+    { rank: 9, name: 'Stealth Killers', teamName: 'Stealth Killers', clanTag: 'SK', wwcd: 0, kills: 20, placementPts: 16, totalPts: 36, total: 36, badge: 'TOP 9' },
+    { rank: 10, name: 'Storm Duo', teamName: 'Storm Duo', clanTag: 'STM', wwcd: 0, kills: 18, placementPts: 14, totalPts: 32, total: 32, badge: 'TOP 10' },
   ],
   SOLO: [
-    { rank: 1, name: 'MADAN_OP', wwcd: 6, kills: 58, placementPts: 45, totalPts: 103, badge: '👑 SOLO GOD' },
-    { rank: 2, name: 'Aravind_Sniper', wwcd: 4, kills: 44, placementPts: 36, totalPts: 80, badge: '🥈 RUNNER UP' },
-    { rank: 3, name: 'Thala_Assaulter', wwcd: 3, kills: 39, placementPts: 32, totalPts: 71, badge: '🥉 3RD PLACE' },
-    { rank: 4, name: 'Cobra_BGMI', wwcd: 3, kills: 36, placementPts: 28, totalPts: 64, badge: 'TOP 4' },
-    { rank: 5, name: 'Tamil_Beast', wwcd: 2, kills: 33, placementPts: 25, totalPts: 58, badge: 'TOP 5' },
-    { rank: 6, name: 'Psycho_Player', wwcd: 2, kills: 29, placementPts: 22, totalPts: 51, badge: 'TOP 6' },
-    { rank: 7, name: 'Vengeance_OP', wwcd: 1, kills: 26, placementPts: 20, totalPts: 46, badge: 'TOP 7' },
-    { rank: 8, name: 'Ghost_Rider', wwcd: 1, kills: 24, placementPts: 18, totalPts: 42, badge: 'TOP 8' },
-    { rank: 9, name: 'Blaster_King', wwcd: 0, kills: 21, placementPts: 16, totalPts: 37, badge: 'TOP 9' },
-    { rank: 10, name: 'Viper_Solo', wwcd: 0, kills: 19, placementPts: 14, totalPts: 33, badge: 'TOP 10' },
+    { rank: 1, name: 'MADAN_OP', teamName: 'MADAN_OP', clanTag: 'MDN', wwcd: 6, kills: 58, placementPts: 45, totalPts: 103, total: 103, badge: '👑 SOLO GOD' },
+    { rank: 2, name: 'Aravind_Sniper', teamName: 'Aravind_Sniper', clanTag: 'ARV', wwcd: 4, kills: 44, placementPts: 36, totalPts: 80, total: 80, badge: '🥈 RUNNER UP' },
+    { rank: 3, name: 'Thala_Assaulter', teamName: 'Thala_Assaulter', clanTag: 'TLA', wwcd: 3, kills: 39, placementPts: 32, totalPts: 71, total: 71, badge: '🥉 3RD PLACE' },
+    { rank: 4, name: 'Cobra_BGMI', teamName: 'Cobra_BGMI', clanTag: 'CBR', wwcd: 3, kills: 36, placementPts: 28, totalPts: 64, total: 64, badge: 'TOP 4' },
+    { rank: 5, name: 'Tamil_Beast', teamName: 'Tamil_Beast', clanTag: 'TB', wwcd: 2, kills: 33, placementPts: 25, totalPts: 58, total: 58, badge: 'TOP 5' },
+    { rank: 6, name: 'Psycho_Player', teamName: 'Psycho_Player', clanTag: 'PSY', wwcd: 2, kills: 29, placementPts: 22, totalPts: 51, total: 51, badge: 'TOP 6' },
+    { rank: 7, name: 'Vengeance_OP', teamName: 'Vengeance_OP', clanTag: 'VG', wwcd: 1, kills: 26, placementPts: 20, totalPts: 46, total: 46, badge: 'TOP 7' },
+    { rank: 8, name: 'Ghost_Rider', teamName: 'Ghost_Rider', clanTag: 'GR', wwcd: 1, kills: 24, placementPts: 18, totalPts: 42, total: 42, badge: 'TOP 8' },
+    { rank: 9, name: 'Blaster_King', teamName: 'Blaster_King', clanTag: 'BK', wwcd: 0, kills: 21, placementPts: 16, totalPts: 37, total: 37, badge: 'TOP 9' },
+    { rank: 10, name: 'Viper_Solo', teamName: 'Viper_Solo', clanTag: 'VIP', wwcd: 0, kills: 19, placementPts: 14, totalPts: 33, total: 33, badge: 'TOP 10' },
   ]
 };
 
-export const getStoredHallOfFame = (format = 'SQUAD') => {
+const formatTenRows = (list = [], defaultList = []) => {
+  const source = Array.isArray(list) && list.length > 0 ? list : defaultList;
+  const result = [];
+  for (let i = 0; i < 10; i++) {
+    const item = source[i] || defaultList[i] || {};
+    const rank = i + 1;
+    const name = item.teamName || item.name || `Position #${rank} Team`;
+    const clanTag = item.clanTag || '';
+    const wwcd = Number(item.wwcd) || 0;
+    const kills = Number(item.kills) || 0;
+    const placementPts = Number(item.placementPts) || 0;
+    const totalPts = Number(item.totalPts !== undefined ? item.totalPts : (item.total !== undefined ? item.total : (kills + placementPts))) || 0;
+    const badge = item.badge || (rank === 1 ? '👑 CHAMPION' : (rank === 2 ? '🥈 RUNNER UP' : (rank === 3 ? '🥉 3RD PLACE' : `TOP ${rank}`)));
+
+    result.push({
+      rank,
+      name,
+      teamName: name,
+      clanTag,
+      wwcd,
+      kills,
+      placementPts,
+      totalPts,
+      total: totalPts,
+      badge
+    });
+  }
+  return result;
+};
+
+export const getStoredHallOfFame = (format = null) => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.HALL_OF_FAME);
     if (!raw) {
       localStorage.setItem(STORAGE_KEYS.HALL_OF_FAME, JSON.stringify(INITIAL_HALL_OF_FAME));
-      return INITIAL_HALL_OF_FAME[format] || INITIAL_HALL_OF_FAME.SQUAD;
+      if (format) {
+        return formatTenRows(INITIAL_HALL_OF_FAME[format], INITIAL_HALL_OF_FAME[format]);
+      }
+      return {
+        SQUAD: formatTenRows(INITIAL_HALL_OF_FAME.SQUAD, INITIAL_HALL_OF_FAME.SQUAD),
+        DUO: formatTenRows(INITIAL_HALL_OF_FAME.DUO, INITIAL_HALL_OF_FAME.DUO),
+        SOLO: formatTenRows(INITIAL_HALL_OF_FAME.SOLO, INITIAL_HALL_OF_FAME.SOLO)
+      };
     }
     const parsed = JSON.parse(raw);
-    return parsed[format] || INITIAL_HALL_OF_FAME[format] || [];
+    if (format) {
+      const selected = parsed[format] || INITIAL_HALL_OF_FAME[format];
+      return formatTenRows(selected, INITIAL_HALL_OF_FAME[format]);
+    }
+    return {
+      SQUAD: formatTenRows(parsed.SQUAD, INITIAL_HALL_OF_FAME.SQUAD),
+      DUO: formatTenRows(parsed.DUO, INITIAL_HALL_OF_FAME.DUO),
+      SOLO: formatTenRows(parsed.SOLO, INITIAL_HALL_OF_FAME.SOLO)
+    };
   } catch (err) {
-    return INITIAL_HALL_OF_FAME[format] || [];
+    if (format) {
+      return formatTenRows(INITIAL_HALL_OF_FAME[format], INITIAL_HALL_OF_FAME[format]);
+    }
+    return INITIAL_HALL_OF_FAME;
   }
 };
 
 export const saveHallOfFame = (format, teamsList) => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.HALL_OF_FAME);
-    const existing = raw ? JSON.parse(raw) : INITIAL_HALL_OF_FAME;
+    const cleanList = formatTenRows(teamsList, INITIAL_HALL_OF_FAME[format] || INITIAL_HALL_OF_FAME.SQUAD);
+    const existing = getStoredHallOfFame();
     const updated = {
       ...existing,
-      [format]: teamsList
+      [format]: cleanList
     };
     localStorage.setItem(STORAGE_KEYS.HALL_OF_FAME, JSON.stringify(updated));
-    window.dispatchEvent(new CustomEvent('portal_hof_updated', { detail: { format, teams: teamsList } }));
+    window.dispatchEvent(new CustomEvent('portal_hof_updated', { detail: { format, teams: cleanList, all: updated } }));
     return updated;
   } catch (e) {
     console.error('Error saving Hall of Fame:', e);
+    return null;
+  }
+};
+
+export const resetHallOfFameToDefault = (format = null) => {
+  try {
+    if (format && INITIAL_HALL_OF_FAME[format]) {
+      return saveHallOfFame(format, INITIAL_HALL_OF_FAME[format]);
+    }
+    localStorage.setItem(STORAGE_KEYS.HALL_OF_FAME, JSON.stringify(INITIAL_HALL_OF_FAME));
+    window.dispatchEvent(new CustomEvent('portal_hof_updated', { detail: { all: INITIAL_HALL_OF_FAME } }));
+    return INITIAL_HALL_OF_FAME;
+  } catch (e) {
     return null;
   }
 };
