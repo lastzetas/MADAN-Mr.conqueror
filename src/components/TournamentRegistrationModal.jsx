@@ -35,7 +35,20 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
   const format = selectedTournament?.format || "TPP Squads (Erangel, Miramar, Sanhok)";
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Strict numeric-only enforcement for all player IGIDs
+    if (['player1Id', 'player2Id', 'player3Id', 'player4Id', 'subId'].includes(name)) {
+      const numericOnly = value.replace(/\D/g, ''); // remove any non-digit character
+      setFormData(prev => ({ ...prev, [name]: numericOnly }));
+      return;
+    }
+    // Captain phone formatting: allow numbers, +, spaces, hyphens
+    if (name === 'captainPhone') {
+      const phoneClean = value.replace(/[^0-9+\s-]/g, '');
+      setFormData(prev => ({ ...prev, [name]: phoneClean }));
+      return;
+    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleNextStep = (e) => {
@@ -49,7 +62,20 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
       setStep(2);
     } else if (step === 2) {
       if (!formData.player1Id || !formData.player2Id || !formData.player3Id || !formData.player4Id) {
-        alert("Please provide In-Game IDs for all 4 starting roster players.");
+        alert("Please provide In-Game Character IDs (numbers only) for all 4 starting roster players.");
+        return;
+      }
+      if (
+        !/^\d+$/.test(formData.player1Id) ||
+        !/^\d+$/.test(formData.player2Id) ||
+        !/^\d+$/.test(formData.player3Id) ||
+        !/^\d+$/.test(formData.player4Id)
+      ) {
+        alert("In-Game Character IDs (IGID) must contain digits (numbers) only, no letters or strings allowed.");
+        return;
+      }
+      if (formData.subId && !/^\d+$/.test(formData.subId)) {
+        alert("Substitute Player IGID must contain digits (numbers) only.");
         return;
       }
       soundFx.playVictory();
@@ -231,29 +257,32 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
           <form onSubmit={handleNextStep} className="space-y-4">
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-sans text-amber-300 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-              <span>Ensure all 4 In-Game IDs (IGIDs) are 100% accurate. Requests are submitted to Admin & Superadmin Desk for anti-cheat verification.</span>
+              <span>Ensure all 4 In-Game IDs (IGIDs) are <strong>numbers only</strong> (BGMI Character ID). Verified directly by Admin & Superadmin anti-cheat desk.</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 1 (Captain) IGN & IGID *
+                  Player 1 (Captain) IGN & IGID (Numbers Only) *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     name="player1Name"
                     required
-                    placeholder="IGN"
+                    placeholder="IGN (e.g. Mortal)"
                     value={formData.player1Name}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
                   />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={12}
                     name="player1Id"
                     required
-                    placeholder="IGID (e.g. 51234567)"
+                    placeholder="IGID (Numbers Only)"
                     value={formData.player1Id}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
@@ -263,23 +292,26 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 2 IGN & IGID *
+                  Player 2 IGN & IGID (Numbers Only) *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     name="player2Name"
                     required
-                    placeholder="IGN"
+                    placeholder="IGN (e.g. Viper)"
                     value={formData.player2Name}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
                   />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={12}
                     name="player2Id"
                     required
-                    placeholder="IGID"
+                    placeholder="IGID (Numbers Only)"
                     value={formData.player2Id}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
@@ -291,23 +323,26 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 3 IGN & IGID *
+                  Player 3 IGN & IGID (Numbers Only) *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     name="player3Name"
                     required
-                    placeholder="IGN"
+                    placeholder="IGN (e.g. Regaltos)"
                     value={formData.player3Name}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
                   />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={12}
                     name="player3Id"
                     required
-                    placeholder="IGID"
+                    placeholder="IGID (Numbers Only)"
                     value={formData.player3Id}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
@@ -317,23 +352,26 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 4 IGN & IGID *
+                  Player 4 IGN & IGID (Numbers Only) *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
                     name="player4Name"
                     required
-                    placeholder="IGN"
+                    placeholder="IGN (e.g. Aman)"
                     value={formData.player4Name}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-sans text-xs focus:border-[#E5C05B] focus:outline-none"
                   />
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={12}
                     name="player4Id"
                     required
-                    placeholder="IGID"
+                    placeholder="IGID (Numbers Only)"
                     value={formData.player4Id}
                     onChange={handleChange}
                     className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"
@@ -344,7 +382,7 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
             <div>
               <label className="block text-[11px] font-bold text-gray-400 uppercase mb-1">
-                Substitute Player (Optional)
+                Substitute Player (Optional - Numbers Only for IGID)
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <input
@@ -357,8 +395,11 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                 />
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={12}
                   name="subId"
-                  placeholder="Sub IGID (optional)"
+                  placeholder="Sub IGID (Numbers Only)"
                   value={formData.subId}
                   onChange={handleChange}
                   className="px-3 py-2 rounded-lg bg-black/60 border border-gray-800 text-white font-mono text-xs focus:border-[#E5C05B] focus:outline-none"

@@ -98,23 +98,29 @@ export const submitTournamentRegistration = (data) => {
   const genId = `SQ-${Math.floor(100 + Math.random() * 900)}`;
   const genTicket = `MC-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  const cleanP1Id = (data.player1Id || '').toString().replace(/\D/g, '');
+  const cleanP2Id = (data.player2Id || '').toString().replace(/\D/g, '');
+  const cleanP3Id = (data.player3Id || '').toString().replace(/\D/g, '');
+  const cleanP4Id = (data.player4Id || '').toString().replace(/\D/g, '');
+  const cleanSubId = (data.subId || '').toString().replace(/\D/g, '');
+
   const igidList = [
-    data.player1Id,
-    data.player2Id,
-    data.player3Id,
-    data.player4Id,
-    data.subId
+    cleanP1Id,
+    cleanP2Id,
+    cleanP3Id,
+    cleanP4Id,
+    cleanSubId
   ].filter(Boolean).join(', ');
 
   const playersList = [
-    { name: data.player1Name || data.captainName || 'Player 1', id: data.player1Id || 'N/A', role: 'Captain / IGL' },
-    { name: data.player2Name || 'Player 2', id: data.player2Id || 'N/A', role: 'Assaulter' },
-    { name: data.player3Name || 'Player 3', id: data.player3Id || 'N/A', role: 'Fragger' },
-    { name: data.player4Name || 'Player 4', id: data.player4Id || 'N/A', role: 'Support' },
+    { name: data.player1Name || data.captainName || 'Player 1', id: cleanP1Id || 'N/A', role: 'Captain / IGL' },
+    { name: data.player2Name || 'Player 2', id: cleanP2Id || 'N/A', role: 'Assaulter' },
+    { name: data.player3Name || 'Player 3', id: cleanP3Id || 'N/A', role: 'Fragger' },
+    { name: data.player4Name || 'Player 4', id: cleanP4Id || 'N/A', role: 'Support' },
   ];
 
-  if (data.subName || data.subId) {
-    playersList.push({ name: data.subName || 'Substitute', id: data.subId || 'N/A', role: 'Substitute' });
+  if (data.subName || cleanSubId) {
+    playersList.push({ name: data.subName || 'Substitute', id: cleanSubId || 'N/A', role: 'Substitute' });
   }
 
   const newSquad = {
@@ -129,9 +135,9 @@ export const submitTournamentRegistration = (data) => {
     captainDiscord: data.captainDiscord || 'N/A',
     slot: slotFormatted,
     ticketId: genTicket,
-    igids: igidList || '5001234, 5005678',
+    igids: igidList || 'N/A',
     players: playersList,
-    substitute: (data.subName || data.subId) ? { name: data.subName, id: data.subId } : null,
+    substitute: (data.subName || cleanSubId) ? { name: data.subName, id: cleanSubId } : null,
     category: data.category || 'Season 7 War Grand Finale',
     status: 'PENDING', // Enters PENDING state for Admin review
     source: 'JOIN NOW Registration Portal',
