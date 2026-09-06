@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { X, Swords, Shield, QrCode, CheckCircle2, Copy, Check, Download, AlertCircle, Sparkles, User, Users, Clock, Send } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Swords, Shield, QrCode, CheckCircle2, Copy, Check, Download, AlertCircle, Sparkles, User, Users, Clock, Send, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { submitTournamentRegistration } from '../utils/portalData';
 
 export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournament }) => {
   const [step, setStep] = useState(1);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     teamName: '',
-    clanTag: '',
+    clanLogo: '',
+    clanLogoName: '',
+    iglName: '',
+    iglPhone: '',
+    iglDiscord: '',
     captainName: '',
     captainPhone: '',
     captainDiscord: '',
@@ -42,20 +47,69 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
       setFormData(prev => ({ ...prev, [name]: numericOnly }));
       return;
     }
-    // Captain phone formatting: allow numbers, +, spaces, hyphens
-    if (name === 'captainPhone') {
+    // IGL / Captain phone formatting: allow numbers, +, spaces, hyphens
+    if (name === 'iglPhone' || name === 'captainPhone') {
       const phoneClean = value.replace(/[^0-9+\s-]/g, '');
-      setFormData(prev => ({ ...prev, [name]: phoneClean }));
+      setFormData(prev => ({ ...prev, iglPhone: phoneClean, captainPhone: phoneClean }));
+      return;
+    }
+    // Synchronize IGL and Captain names
+    if (name === 'iglName' || name === 'captainName') {
+      setFormData(prev => ({ ...prev, iglName: value, captainName: value }));
+      return;
+    }
+    // Synchronize IGL and Captain discord
+    if (name === 'iglDiscord' || name === 'captainDiscord') {
+      setFormData(prev => ({ ...prev, iglDiscord: value, captainDiscord: value }));
       return;
     }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (PNG, JPG, WEBP, or SVG).');
+      return;
+    }
+    if (file.size > 2.5 * 1024 * 1024) {
+      alert('Logo file size exceeds 2.5MB. Please upload a smaller image.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData(prev => ({
+        ...prev,
+        clanLogo: event.target.result,
+        clanLogoName: file.name
+      }));
+      soundFx.playClick();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = (e) => {
+    e?.stopPropagation();
+    setFormData(prev => ({
+      ...prev,
+      clanLogo: '',
+      clanLogoName: ''
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    soundFx.playClick();
+  };
+
   const handleNextStep = (e) => {
     e.preventDefault();
     if (step === 1) {
-      if (!formData.teamName || !formData.captainName || !formData.captainPhone) {
-        alert("Please complete the required Team and Captain details.");
+      const effectiveIglName = formData.iglName || formData.captainName;
+      const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
+
+      if (!formData.teamName || !effectiveIglName || !effectiveIglPhone) {
+        alert("Please complete the required Team Name and IGL (In Game Leader) contact details.");
         return;
       }
       soundFx.playClick();
@@ -81,8 +135,18 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
       soundFx.playVictory();
       
       // Dispatch registration request directly to Admin & Superadmin Portal
+      const effectiveIglName = formData.iglName || formData.captainName;
+      const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
+      const effectiveIglDiscord = formData.iglDiscord || formData.captainDiscord;
+
       const result = submitTournamentRegistration({
         ...formData,
+        iglName: effectiveIglName,
+        iglPhone: effectiveIglPhone,
+        iglDiscord: effectiveIglDiscord,
+        captainName: effectiveIglName,
+        captainPhone: effectiveIglPhone,
+        captainDiscord: effectiveIglDiscord,
         category: tournamentTitle
       });
 
@@ -101,7 +165,9 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
   };
 
   const handleCopyPass = () => {
-    const passDetails = `MADAN CONQUEROR CUP APPLICATION TICKET\nTeam: ${formData.teamName}\nSlot: ${slotCode}\nTicket ID: ${ticketId}\nTournament: ${tournamentTitle}\nCaptain: ${formData.captainName} (${formData.captainPhone})\nStatus: PENDING ADMIN & SUPERADMIN VERIFICATION`;
+    const effectiveIglName = formData.iglName || formData.captainName;
+    const effectiveIglPhone = formData.iglPhone || formData.captainPhone;
+    const passDetails = `MADAN CONQUEROR CUP APPLICATION TICKET\nTeam: ${formData.teamName}\nSlot: ${slotCode}\nTicket ID: ${ticketId}\nTournament: ${tournamentTitle}\nIGL (In Game Leader): ${effectiveIglName} (${effectiveIglPhone})\nStatus: PENDING ADMIN & SUPERADMIN VERIFICATION`;
     navigator.clipboard.writeText(passDetails);
     setCopiedPass(true);
     soundFx.playSuccess();
@@ -180,46 +246,86 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
                   className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
                 />
               </div>
+
+              {/* Clan Logo Upload Area (Replaced Clan Tag) */}
               <div>
-                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  Clan Tag / Acronym
+                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>Upload Clan Logo (Optional)</span>
+                  {formData.clanLogo && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveLogo}
+                      className="text-[10px] text-rose-400 hover:text-rose-300 font-mono flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove</span>
+                    </button>
+                  )}
                 </label>
+                
                 <input
-                  type="text"
-                  name="clanTag"
-                  placeholder="e.g. [TTN]"
-                  value={formData.clanTag}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                  onChange={handleLogoUpload}
+                  className="hidden"
                 />
+
+                {formData.clanLogo ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-black/60 border border-[#E5C05B]/60 hover:border-[#E5C05B] transition-all cursor-pointer group"
+                    title="Click to replace clan logo"
+                  >
+                    <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E5C05B] bg-slate-900 shrink-0 flex items-center justify-center">
+                      <img src={formData.clanLogo} alt="Clan Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs text-white font-semibold truncate block">
+                        {formData.clanLogoName || 'Clan_Logo.png'}
+                      </span>
+                      <span className="text-[10px] text-teal-400 font-mono block">
+                        ✓ Logo Attached • Click to change
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-black/40 border border-dashed border-gray-700 hover:border-[#E5C05B]/70 hover:bg-black/60 transition-all cursor-pointer text-gray-400 hover:text-gray-200"
+                  >
+                    <Upload className="w-4 h-4 text-[#E5C05B]" />
+                    <span className="text-xs font-sans">Choose Logo (PNG/JPG up to 2.5MB)</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  Captain In-Game / Full Name *
+                  IGL (In Game Leader) In-Game / Full Name *
                 </label>
                 <input
                   type="text"
-                  name="captainName"
+                  name="iglName"
                   required
-                  placeholder="e.g. Vijay / TTN_Alpha"
-                  value={formData.captainName}
+                  placeholder="e.g. Vijay / TTN_Alpha (IGL)"
+                  value={formData.iglName || formData.captainName}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  Captain WhatsApp / Phone Number *
+                  IGL WhatsApp / Phone Number *
                 </label>
                 <input
                   type="tel"
-                  name="captainPhone"
+                  name="iglPhone"
                   required
                   placeholder="+91 98765 43210"
-                  value={formData.captainPhone}
+                  value={formData.iglPhone || formData.captainPhone}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
                 />
@@ -228,13 +334,13 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
 
             <div>
               <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                Captain Discord Tag (Optional)
+                IGL Discord Tag (Optional)
               </label>
               <input
                 type="text"
-                name="captainDiscord"
-                placeholder="captain#1234 or discord username"
-                value={formData.captainDiscord}
+                name="iglDiscord"
+                placeholder="igl#1234 or discord username"
+                value={formData.iglDiscord || formData.captainDiscord}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-gray-800 focus:border-[#E5C05B] text-white font-sans text-xs focus:outline-none"
               />
@@ -263,7 +369,7 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">
-                  Player 1 (Captain) IGN & IGID (Numbers Only) *
+                  Player 1 (IGL) IGN & IGID (Numbers Only) *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -443,8 +549,12 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
               
               <div className="flex items-center justify-between border-b border-[#E5C05B]/30 pb-3 mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#E5C05B]">
-                    <img src="/assets/conqueror_badge.jpg" alt="Badge" className="w-full h-full object-cover" />
+                  <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E5C05B] bg-slate-900 flex items-center justify-center shrink-0">
+                    {formData.clanLogo ? (
+                      <img src={formData.clanLogo} alt="Clan Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <img src="/assets/conqueror_badge.jpg" alt="Badge" className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <div>
                     <span className="text-[10px] font-mono font-bold text-[#E5C05B] block">MADAN ESPORTS PASS</span>
@@ -459,11 +569,13 @@ export const TournamentRegistrationModal = ({ isOpen, onClose, selectedTournamen
               <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                 <div>
                   <span className="text-gray-400 block text-[10px] font-mono uppercase">REGISTERED SQUAD</span>
-                  <span className="font-montserrat font-bold text-xs sm:text-sm text-white">{formData.teamName} {formData.clanTag && `[${formData.clanTag}]`}</span>
+                  <span className="font-montserrat font-bold text-xs sm:text-sm text-white flex items-center gap-1.5">
+                    {formData.teamName}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-gray-400 block text-[10px] font-mono uppercase">CAPTAIN CONTACT</span>
-                  <span className="font-mono text-white text-xs">{formData.captainName} ({formData.captainPhone})</span>
+                  <span className="text-gray-400 block text-[10px] font-mono uppercase">IGL (IN GAME LEADER) CONTACT</span>
+                  <span className="font-mono text-white text-xs">{formData.iglName || formData.captainName} ({formData.iglPhone || formData.captainPhone})</span>
                 </div>
               </div>
 

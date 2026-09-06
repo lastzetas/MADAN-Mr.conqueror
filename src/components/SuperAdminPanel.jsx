@@ -176,7 +176,7 @@ export const SuperAdminPanel = ({ isOpen, onClose, user, onLogout }) => {
                     </div>
 
                     <p className="font-rajdhani text-xs text-[#788294] mt-1">
-                      Captain: <span className="text-[#CBD5E1]">{team.captain}</span> ({team.phone}) • IGIDs: <span className="font-mono text-[11px] text-[#94A3B8]">{team.igids}</span>
+                      IGL: <span className="text-[#CBD5E1]">{team.captain}</span> ({team.phone}) • IGIDs: <span className="font-mono text-[11px] text-[#94A3B8]">{team.igids}</span>
                     </p>
                   </div>
 

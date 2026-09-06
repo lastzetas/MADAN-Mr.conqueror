@@ -98,6 +98,10 @@ export const submitTournamentRegistration = (data) => {
   const genId = `SQ-${Math.floor(100 + Math.random() * 900)}`;
   const genTicket = `MC-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  const cleanIglName = data.iglName || data.captainName || 'Anonymous IGL';
+  const cleanIglPhone = data.iglPhone || data.captainPhone || '+91 99999 00000';
+  const cleanIglDiscord = data.iglDiscord || data.captainDiscord || 'N/A';
+
   const cleanP1Id = (data.player1Id || '').toString().replace(/\D/g, '');
   const cleanP2Id = (data.player2Id || '').toString().replace(/\D/g, '');
   const cleanP3Id = (data.player3Id || '').toString().replace(/\D/g, '');
@@ -113,7 +117,7 @@ export const submitTournamentRegistration = (data) => {
   ].filter(Boolean).join(', ');
 
   const playersList = [
-    { name: data.player1Name || data.captainName || 'Player 1', id: cleanP1Id || 'N/A', role: 'Captain / IGL' },
+    { name: data.player1Name || cleanIglName || 'Player 1', id: cleanP1Id || 'N/A', role: 'IGL (In Game Leader)' },
     { name: data.player2Name || 'Player 2', id: cleanP2Id || 'N/A', role: 'Assaulter' },
     { name: data.player3Name || 'Player 3', id: cleanP3Id || 'N/A', role: 'Fragger' },
     { name: data.player4Name || 'Player 4', id: cleanP4Id || 'N/A', role: 'Support' },
@@ -127,12 +131,17 @@ export const submitTournamentRegistration = (data) => {
     id: genId,
     teamName: data.teamName || 'Custom Squad',
     name: data.teamName || 'Custom Squad',
+    clanLogo: data.clanLogo || '',
+    clanLogoName: data.clanLogoName || '',
     clanTag: data.clanTag || '',
-    captainName: data.captainName || 'Anonymous Captain',
-    captain: data.captainName || 'Anonymous Captain',
-    captainPhone: data.captainPhone || '+91 99999 00000',
-    phone: data.captainPhone || '+91 99999 00000',
-    captainDiscord: data.captainDiscord || 'N/A',
+    iglName: cleanIglName,
+    iglPhone: cleanIglPhone,
+    iglDiscord: cleanIglDiscord,
+    captainName: cleanIglName,
+    captain: cleanIglName,
+    captainPhone: cleanIglPhone,
+    phone: cleanIglPhone,
+    captainDiscord: cleanIglDiscord,
     slot: slotFormatted,
     ticketId: genTicket,
     igids: igidList || 'N/A',

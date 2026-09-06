@@ -111,14 +111,14 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
 
   const filteredTeams = teams.filter(t => {
     const teamName = t.teamName || t.name || '';
-    const captainName = t.captainName || t.captain || '';
+    const iglName = t.iglName || t.captainName || t.captain || '';
     const slot = t.slot || '';
     const ticketId = t.ticketId || '';
     const igids = t.igids || '';
 
     const matchesSearch =
       teamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      captainName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      iglName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       slot.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticketId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       igids.toLowerCase().includes(searchQuery.toLowerCase());
@@ -218,7 +218,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
             { id: 'TEAMS', label: `JOIN NOW Applications & Whitelist (${teams.length})`, icon: Swords, badge: pendingCount > 0 ? `${pendingCount} Pending` : null },
             { id: 'OVERVIEW', label: 'Overview Telemetry', icon: Activity },
             { id: 'BROADCAST', label: 'Room Broadcaster', icon: Radio },
-            { id: 'INQUIRIES', label: `Captain Disputes (${inquiries.length})`, icon: MessageSquare, count: openInquiriesCount },
+            { id: 'INQUIRIES', label: `IGL & Team Inquiries (${inquiries.length})`, icon: MessageSquare, count: openInquiriesCount },
             { id: 'SEASON', label: 'Season 7 Parameters', icon: Sliders },
             { id: 'ROLES', label: 'Admins & Access Hierarchy', icon: Shield },
             { id: 'AUDIT', label: 'Security & JWT Logs', icon: Lock },
@@ -289,7 +289,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                   <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="Search squad, captain, slot, ticket ID, IGID..."
+                    placeholder="Search squad, IGL, slot, ticket ID, IGID..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] text-[#0F172A] text-xs focus:outline-none focus:border-teal-500 font-sans"
@@ -372,6 +372,9 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                         <span className="font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200 text-xs font-mono">
                           {team.slot}
                         </span>
+                        {team.clanLogo && (
+                          <img src={team.clanLogo} alt="Clan Logo" className="w-7 h-7 rounded-lg object-cover border border-slate-300 shadow-xs" />
+                        )}
                         <h4 className="font-extrabold text-sm sm:text-base text-[#0F172A]">
                           {team.teamName || team.name} {team.clanTag && <span className="text-slate-500 font-mono">[{team.clanTag}]</span>}
                         </h4>
@@ -446,28 +449,28 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                       </div>
                     </div>
 
-                    {/* Middle: Captain Contact Details & Metadata */}
+                    {/* Middle: IGL Contact Details & Metadata */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono bg-white p-3.5 rounded-2xl border border-[#E2E8F0]">
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">Squad Captain:</span>
-                        <strong className="text-[#0F172A] text-sm">{team.captainName || team.captain}</strong>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">Squad IGL (In Game Leader):</span>
+                        <strong className="text-[#0F172A] text-sm">{team.iglName || team.captainName || team.captain}</strong>
                       </div>
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">WhatsApp Contact:</span>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">IGL WhatsApp Contact:</span>
                         <a
-                          href={`https://wa.me/${(team.captainPhone || team.phone)?.replace(/[^0-9]/g, '')}`}
+                          href={`https://wa.me/${(team.iglPhone || team.captainPhone || team.phone)?.replace(/[^0-9]/g, '')}`}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-bold hover:underline"
-                          title="Click to message captain on WhatsApp"
+                          title="Click to message IGL on WhatsApp"
                         >
                           <Phone className="w-3.5 h-3.5 text-emerald-500" />
-                          <span>{team.captainPhone || team.phone}</span>
+                          <span>{team.iglPhone || team.captainPhone || team.phone}</span>
                         </a>
                       </div>
                       <div>
-                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">Discord / Time:</span>
-                        <span className="text-[#334155]">{team.captainDiscord || 'N/A'} • {team.registeredAt}</span>
+                        <span className="text-[#64748B] block text-[10px] uppercase font-bold">IGL Discord / Time:</span>
+                        <span className="text-[#334155]">{team.iglDiscord || team.captainDiscord || 'N/A'} • {team.registeredAt}</span>
                       </div>
                     </div>
 
@@ -478,7 +481,7 @@ export const SuperAdminDashboard = ({ user, onLogout, onSwitchToAdmin, onBackToP
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
                         {(team.players && team.players.length > 0 ? team.players : [
-                          { name: team.captainName || 'Player 1', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'Captain / IGL' },
+                          { name: team.iglName || team.captainName || 'Player 1', id: team.igids?.split(',')[0]?.trim() || 'N/A', role: 'IGL (In Game Leader)' },
                           { name: 'Player 2', id: team.igids?.split(',')[1]?.trim() || 'N/A', role: 'Assaulter' },
                           { name: 'Player 3', id: team.igids?.split(',')[2]?.trim() || 'N/A', role: 'Fragger' },
                           { name: 'Player 4', id: team.igids?.split(',')[3]?.trim() || 'N/A', role: 'Support' }
