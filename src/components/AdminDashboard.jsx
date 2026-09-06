@@ -73,7 +73,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     status: 'OPEN',
     category: 'BOTSQUADWAR',
     banner: '/assets/conqueror_badge.jpg',
-    description: 'Official BGMI Competitive Tournament'
+    description: 'Official BGMI Tournament'
   });
   const [editingTourney, setEditingTourney] = useState(null);
   const [showTourneyModal, setShowTourneyModal] = useState(false);
@@ -195,11 +195,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     soundFx.playVictory();
     saveHallOfFame(hofFormat, hofEditBuffer);
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-    alert(`Top 10 Points Table for ${hofFormat} successfully saved and synced to public Hall of Fame!`);
+    alert("Top 10 Points Table for " + hofFormat + " successfully saved and synced to public Hall of Fame!");
   };
 
   const handleResetHof = () => {
-    if (window.confirm(`Reset ${hofFormat} Top 10 to official default standings?`)) {
+    if (window.confirm("Reset " + hofFormat + " Top 10 to official default standings?")) {
       soundFx.playClick();
       const updated = resetHallOfFameToDefault(hofFormat);
       if (updated && updated[hofFormat]) {
@@ -360,13 +360,13 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     soundFx.playVictory();
     convertSponsorRequestToSponsor(req.id, {
       name: req.business || req.name,
-      category: `${req.tierInterest || 'Official'} Arena Partner`,
+      category: (req.tierInterest || 'Official') + " Arena Partner",
       tier: req.tierInterest || 'TITLE',
       link: req.notes && req.notes.startsWith('http') ? req.notes : 'https://',
-      tagline: `Official Partner from ${req.city}`
+      tagline: "Official Partner from " + req.city
     });
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
-    alert(`Sponsor partnership for "${req.business}" approved and added to active public sponsors!`);
+    alert("Sponsor partnership for \"" + req.business + "\" approved and added to active public sponsors!");
   };
 
   const handleUpdateReqStatus = (id, status) => {
@@ -389,7 +389,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     setShowCreateTeamModal(false);
     setNewTeamData({ teamName: '', iglName: '', iglPhone: '', matchType: 'SQUAD', passcode: '' });
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
-    alert(`Team created successfully!\nTicket ID: ${result.team.ticketId}\nPasscode: ${result.team.passcode}\nSlot: ${result.team.slot}`);
+    alert("Team created successfully!\nTicket ID: " + result.team.ticketId + "\nPasscode: " + result.team.passcode + "\nSlot: " + result.team.slot);
   };
 
   // Broadcast Handler
@@ -432,11 +432,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
   const pendingSponsorReqsCount = sponsorRequests.filter(r => r.status === 'PENDING').length;
 
   const sidebarMenuItems = [
-    { id: 'REGISTRATIONS', label: 'Registration Requests', icon: Swords, badge: pendingRostersCount > 0 ? `${pendingRostersCount}` : null },
+    { id: 'REGISTRATIONS', label: 'Registration Requests', icon: Swords, badge: pendingRostersCount > 0 ? ('' + pendingRostersCount) : null },
     { id: 'HALL_OF_FAME', label: 'Hall of Fame (Top 10s)', icon: Trophy },
     { id: 'TOURNAMENTS', label: 'Tournaments Manager', icon: Sliders },
     { id: 'POLLS', label: 'Live Fan Polls', icon: BarChart2 },
-    { id: 'SPONSORS', label: 'Sponsors & Requests', icon: DollarSign, badge: pendingSponsorReqsCount > 0 ? `${pendingSponsorReqsCount} New` : null },
+    { id: 'SPONSORS', label: 'Sponsors & Requests', icon: DollarSign, badge: pendingSponsorReqsCount > 0 ? (pendingSponsorReqsCount + ' New') : null },
     { id: 'TEAMS_DISPATCH', label: 'Create Teams & Dispatcher', icon: Radio },
     { id: 'TELEMETRY', label: 'Server Ping Matrix', icon: Wifi }
   ];
@@ -445,24 +445,22 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
     <div className="min-h-screen bg-[#EEF2F6] flex text-[#1E293B] font-sans selection:bg-teal-500/20 selection:text-teal-900">
       
       {/* 1. DEDICATED LEFT DESKTOP SIDEBAR */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0B0F17] text-[#E2E8F0] border-r border-[#1E2536] flex flex-col justify-between transition-transform duration-300 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <aside className={"fixed inset-y-0 left-0 z-50 w-64 bg-[#0B0F17] text-[#E2E8F0] border-r border-[#1E2536] flex flex-col justify-between transition-transform duration-300 " + (sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0")}>
         
         {/* Top Brand Logo Strip */}
         <div>
           <div className="p-4 border-b border-[#1E2536] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${badgeColor} flex items-center justify-center text-white font-black text-sm shadow-md`}>
-                {isSuperAdmin ? 'SA' : 'AD'}
+              <div className={"w-9 h-9 rounded-xl bg-gradient-to-tr " + "from-teal-500 to-cyan-500" + " flex items-center justify-center text-white font-black text-sm shadow-md"}>
+                AD
               </div>
               <div>
                 <span className="font-extrabold text-sm text-white tracking-tight uppercase block font-montserrat">
-                  {roleName}
+                  MATCH OPS DESK
                 </span>
-                <span className={`text-[10px] ${isSuperAdmin ? 'text-amber-400' : 'text-teal-400'} font-mono font-bold flex items-center gap-1`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isSuperAdmin ? 'bg-amber-400' : 'bg-teal-400'} animate-pulse`} />
-                  {badgeTitle}
+                <span className={"text-[10px] " + "text-teal-400" + " font-mono font-bold flex items-center gap-1"}>
+                  <span className={"w-1.5 h-1.5 rounded-full " + "bg-teal-400" + " animate-pulse"} />
+                  LEVEL 5 CONSOLE
                 </span>
               </div>
             </div>
@@ -492,13 +490,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                     setActiveTab(item.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-montserrat font-bold tracking-tight transition-all cursor-pointer ${
+                  className={"w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-montserrat font-bold tracking-tight transition-all cursor-pointer " + (
                     active
-                      ? isSuperAdmin
-                        ? 'bg-[#1C1708] border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                        : 'bg-[#141E28] border border-teal-500/50 text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
-                      : 'text-[#94A3B8] hover:text-white hover:bg-[#121722]'
-                  }`}
+                      ? "bg-[#141E28] border border-teal-500/50 text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]"
+                      : "text-[#94A3B8] hover:text-white hover:bg-[#121722]"
+                  )}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className="w-4 h-4" />
@@ -506,11 +502,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                   </div>
 
                   {item.badge && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                    <span className={"text-[10px] px-2 py-0.5 rounded-full font-mono font-bold " + (
                       active
-                        ? 'bg-white text-black'
-                        : 'bg-red-500/20 text-red-400 border border-red-500/40'
-                    }`}>
+                        ? "bg-white text-black"
+                        : "bg-red-500/20 text-red-400 border border-red-500/40"
+                    )}>
                       {item.badge}
                     </span>
                   )}
@@ -522,23 +518,15 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
 
         {/* Bottom Switcher & Logout */}
         <div className="p-3 border-t border-[#1E2536] space-y-2 bg-[#080B10]">
-          {isSuperAdmin ? (
-            <button
-              onClick={onSwitchToAdmin}
-              className="w-full py-2 px-3 rounded-xl bg-[#121722] hover:bg-[#1A2232] border border-[#232D40] text-xs font-bold text-teal-400 flex items-center justify-center gap-2 cursor-pointer transition-all"
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Switch to Match Ops</span>
-            </button>
-          ) : onSwitchToSuperAdmin ? (
-            <button
-              onClick={onSwitchToSuperAdmin}
-              className="w-full py-2 px-3 rounded-xl bg-[#1C1708] hover:bg-[#262010] border border-amber-500/40 text-xs font-bold text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-all"
-            >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>Super Admin Console</span>
-            </button>
-          ) : null}
+          {onSwitchToSuperAdmin && (
+        <button
+          onClick={onSwitchToSuperAdmin}
+          className="w-full py-2 px-3 rounded-xl bg-[#1C1708] hover:bg-[#262010] border border-amber-500/40 text-xs font-bold text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-all"
+        >
+          <Shield className="w-3.5 h-3.5 text-amber-400" />
+          <span>Super Admin Console</span>
+        </button>
+      )}
 
           <div className="flex items-center gap-2">
             <button
@@ -579,7 +567,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                 {sidebarMenuItems.find(i => i.id === activeTab)?.label || 'OPERATIONS'}
               </h2>
               <span className="text-[11px] text-[#64748B] font-mono">
-                Active Session: {user?.username || user?.email || (isSuperAdmin ? 'Super Admin' : 'Match Ops')}
+                Active Session: {user?.username || user?.email || (user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Match Ops')}
               </span>
             </div>
           </div>
@@ -604,7 +592,6 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
           {activeTab === 'REGISTRATIONS' && (
             <div className="space-y-6">
               
-              {/* Header with Search & Format Filters */}
               <div className="bg-white border border-[#E2E8F0] rounded-3xl p-5 shadow-xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
@@ -639,16 +626,16 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                         soundFx.playClick();
                         setMatchTypeFilter(tab.id);
                       }}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                      className={"p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between " + (
                         matchTypeFilter === tab.id
-                          ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-sm'
-                          : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:bg-slate-100'
-                      }`}
+                          ? "bg-[#0F172A] text-white border-[#0F172A] shadow-sm"
+                          : "bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:bg-slate-100"
+                      )}
                     >
                       <span className="font-montserrat font-bold text-xs">{tab.label}</span>
-                      <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
-                        matchTypeFilter === tab.id ? 'bg-white/20 text-white' : 'bg-slate-200 text-[#0F172A]'
-                      }`}>
+                      <span className={"text-xs font-mono font-bold px-2 py-0.5 rounded-full " + (
+                        matchTypeFilter === tab.id ? "bg-white/20 text-white" : "bg-slate-200 text-[#0F172A]"
+                      )}>
                         {tab.count}
                       </span>
                     </button>
@@ -676,11 +663,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                           soundFx.playClick();
                           setStatusFilter(st);
                         }}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all cursor-pointer ${
+                        className={"px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition-all cursor-pointer " + (
                           statusFilter === st
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-[#F1F5F9] text-[#64748B] hover:bg-slate-200'
-                        }`}
+                            ? "bg-teal-600 text-white"
+                            : "bg-[#F1F5F9] text-[#64748B] hover:bg-slate-200"
+                        )}
                       >
                         {st}
                       </button>
@@ -730,13 +717,13 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                           </div>
 
                           <div className="flex flex-col items-end gap-1">
-                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                            <span className={"text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase " + (
                               team.status === 'VERIFIED'
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : team.status === 'REJECTED'
                                 ? 'bg-red-100 text-red-800 border border-red-300'
                                 : 'bg-amber-100 text-amber-800 border border-amber-300'
-                            }`}>
+                            )}>
                               {team.status || 'PENDING'}
                             </span>
                             <span className="text-[10px] font-mono text-slate-400">{team.ticketId || team.id}</span>
@@ -753,7 +740,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
 
                             {team.iglPhone && (
                               <a
-                                href={`https://wa.me/${team.iglPhone.replace(/\D/g, '')}`}
+                                href={"https://wa.me/" + team.iglPhone.replace(/\D/g, '')}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer"
@@ -849,11 +836,11 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                           soundFx.playClick();
                           setHofFormat(fmt);
                         }}
-                        className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold uppercase transition-all cursor-pointer ${
+                        className={"px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold uppercase transition-all cursor-pointer " + (
                           hofFormat === fmt
                             ? 'bg-[#0F172A] text-white shadow-sm'
                             : 'text-[#64748B] hover:text-[#0F172A]'
-                        }`}
+                        )}
                       >
                         {fmt} TOP 10
                       </button>
@@ -919,7 +906,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                           <input
                             type="text"
                             value={team.teamName || team.name || ''}
-                            placeholder={`Team / Player ${idx + 1}`}
+                            placeholder={"Team / Player " + (idx + 1)}
                             onChange={(e) => handleHofCellChange(idx, 'teamName', e.target.value)}
                             className="w-full max-w-xs px-2.5 py-1.5 rounded-lg bg-white border border-[#CBD5E1] text-[#0F172A] font-sans text-xs font-bold focus:border-teal-500 focus:outline-none"
                           />
@@ -1021,9 +1008,9 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold uppercase">
                           {t.category || 'TOURNAMENT'}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                        <span className={"text-[10px] px-2 py-0.5 rounded-full font-bold uppercase " + (
                           t.status === 'OPEN' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                        )}>
                           {t.status}
                         </span>
                       </div>
@@ -1305,7 +1292,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                                 <span className="font-mono text-teal-700">{opt.votes || 0} ({pct}%)</span>
                               </div>
                               <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                <div className="bg-teal-600 h-full rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                <div className="bg-teal-600 h-full rounded-full transition-all" style={{ width: pct + "%" }} />
                               </div>
                             </div>
                           );
@@ -1366,19 +1353,19 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                       soundFx.playClick();
                       setSponsorSubTab('REQUESTS');
                     }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    className={"p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between " + (
                       sponsorSubTab === 'REQUESTS'
                         ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-sm'
                         : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:bg-slate-100'
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-2">
                       <HeartHandshake className="w-4 h-4 text-amber-400" />
                       <span className="font-montserrat font-bold text-xs sm:text-sm">Incoming Sponsor Requests</span>
                     </div>
-                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                    <span className={"text-xs font-mono font-bold px-2 py-0.5 rounded-full " + (
                       sponsorSubTab === 'REQUESTS' ? 'bg-amber-400 text-black' : 'bg-slate-200 text-[#0F172A]'
-                    }`}>
+                    )}>
                       {sponsorRequests.length}
                     </span>
                   </button>
@@ -1388,19 +1375,19 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                       soundFx.playClick();
                       setSponsorSubTab('LIVE_SPONSORS');
                     }}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    className={"p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between " + (
                       sponsorSubTab === 'LIVE_SPONSORS'
                         ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-sm'
                         : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:bg-slate-100'
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-2">
                       <Award className="w-4 h-4 text-teal-400" />
                       <span className="font-montserrat font-bold text-xs sm:text-sm">Live Displayed Sponsors</span>
                     </div>
-                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                    <span className={"text-xs font-mono font-bold px-2 py-0.5 rounded-full " + (
                       sponsorSubTab === 'LIVE_SPONSORS' ? 'bg-teal-400 text-black' : 'bg-slate-200 text-[#0F172A]'
-                    }`}>
+                    )}>
                       {sponsors.length}
                     </span>
                   </button>
@@ -1441,7 +1428,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                               </div>
 
                               <div className="flex flex-col items-end gap-1">
-                                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                                <span className={"text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase " + (
                                   req.status === 'APPROVED'
                                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                     : req.status === 'CONTACTED'
@@ -1449,7 +1436,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                                     : req.status === 'REJECTED'
                                     ? 'bg-red-100 text-red-800 border border-red-300'
                                     : 'bg-amber-100 text-amber-800 border border-amber-300'
-                                }`}>
+                                )}>
                                   {req.status}
                                 </span>
                                 <span className="text-[10px] font-mono text-slate-400">{req.ticketId}</span>
@@ -1469,7 +1456,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-[#64748B]">Email:</span>
-                                  <a href={`mailto:${req.email}`} className="text-teal-700 font-bold hover:underline">{req.email}</a>
+                                  <a href={"mailto:" + req.email} className="text-teal-700 font-bold hover:underline">{req.email}</a>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-[#64748B]">Mobile / WA:</span>
@@ -1491,7 +1478,7 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                               {/* Direct WhatsApp button */}
                               {req.phone && (
                                 <a
-                                  href={`https://wa.me/${req.phone.replace(/\D/g, '')}`}
+                                  href={"https://wa.me/" + req.phone.replace(/\D/g, '')}
                                   target="_blank"
                                   rel="noreferrer"
                                   onClick={() => handleUpdateReqStatus(req.id, 'CONTACTED')}
@@ -1539,9 +1526,9 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold uppercase">
                               {s.tier || 'OFFICIAL'}
                             </span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                            <span className={"text-[10px] px-2 py-0.5 rounded-full font-bold uppercase " + (
                               s.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
-                            }`}>
+                            )}>
                               {s.status}
                             </span>
                           </div>
@@ -1719,7 +1706,6 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
           {activeTab === 'TEAMS_DISPATCH' && (
             <div className="space-y-6">
               
-              {/* Top Dispatcher Form */}
               <div className="bg-[#0B0F17] text-white border border-[#1E2536] rounded-3xl p-6 shadow-xl space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1E2536] pb-4">
                   <div className="flex items-center gap-3">
@@ -1827,14 +1813,14 @@ export const AdminDashboard = ({ user, onLogout, onSwitchToSuperAdmin, onBackToP
                     <tbody className="divide-y divide-[#E2E8F0] font-mono">
                       {rosterTeams.map((team, idx) => (
                         <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                          <td className="py-2.5 px-3 font-bold text-teal-700">{team.slot || `SLOT-${idx + 1}`}</td>
+                          <td className="py-2.5 px-3 font-bold text-teal-700">{team.slot || ("SLOT-" + (idx + 1))}</td>
                           <td className="py-2.5 px-3 font-sans font-bold text-[#0F172A]">{team.teamName || team.name}</td>
                           <td className="py-2.5 px-3 font-bold text-[#0F172A]">{team.ticketId}</td>
                           <td className="py-2.5 px-3 font-bold text-amber-700">{team.passcode || '123456'}</td>
                           <td className="py-2.5 px-3 font-sans text-[#64748B]">{team.iglName || 'Leader'} ({team.iglPhone || 'N/A'})</td>
                           <td className="py-2.5 px-3 text-right">
                             <button
-                              onClick={() => handleCopyText(`Team: ${team.teamName}\nTicket: ${team.ticketId}\nPIN: ${team.passcode || '123456'}\nSlot: ${team.slot}`, team.id)}
+                              onClick={() => handleCopyText("Team: " + (team.teamName || team.name) + "\nTicket: " + team.ticketId + "\nPIN: " + (team.passcode || '123456') + "\nSlot: " + team.slot, team.id)}
                               className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer"
                             >
                               {copiedId === team.id ? 'Copied!' : 'Copy Credentials'}
