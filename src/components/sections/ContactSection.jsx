@@ -44,7 +44,7 @@ export const ContactSection = () => {
                 CONTACT US
               </h3>
               <p className="font-rajdhani text-xs text-[#788294]">
-                Direct Match Ops & Anti-Cheat Whitelist Desk
+                Open Communications • All Inquiries, Feedback, Objections & Business Welcome
               </p>
             </div>
 
@@ -52,18 +52,18 @@ export const ContactSection = () => {
             <div className="p-4 rounded-lg bg-[#0E2E25] border border-[#1BE7A3]/50 text-xs font-rajdhani text-[#1BE7A3]">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-6 h-6 rounded-full bg-[#1BE7A3] text-black font-bold text-[10px] flex items-center justify-center">
-                  S
+                  🤝
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-[#1BE7A3] block">Simon Vincent</span>
-                  <span className="text-[10px] opacity-75 font-mono">Operations Lead</span>
+                  <span className="text-xs font-bold text-[#1BE7A3] block">Encouragement, Feedback & Business</span>
+                  <span className="text-[10px] opacity-75 font-mono">Public Liaison & Growth</span>
                 </div>
-                <span className="text-[10px] opacity-70 ml-auto font-mono bg-[#1BE7A3]/20 px-1.5 py-0.5 rounded">
-                  FLOOR 18
+                <span className="text-[10px] opacity-80 ml-auto font-mono bg-[#1BE7A3]/20 px-1.5 py-0.5 rounded uppercase">
+                  ALL WELCOME
                 </span>
               </div>
               <p className="text-xs leading-relaxed text-[#8EECCE] pl-8">
-                "Your conqueror slot queries and custom room credentials are addressed instantly by our match ops team."
+                "Whether you want to share words of encouragement, offer valuable feedback, pitch an exciting business idea, or collaborate on brand sponsorships — any kind of enquiry is heartily welcome!"
               </p>
             </div>
 
@@ -72,18 +72,18 @@ export const ContactSection = () => {
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-full bg-[#2B3448] text-[#E5C05B] font-bold text-[10px] flex items-center justify-center">
-                    K
+                    ⚖️
                   </div>
-                  <span className="text-[#E5C05B] font-bold text-xs">Kamo (Anti-Cheat Mod)</span>
+                  <span className="text-[#E5C05B] font-bold text-xs">Objections, Obligations & Grievances</span>
                 </div>
-                <span className="text-[10px] text-[#64748B]">7 hours ago</span>
+                <span className="text-[10px] text-emerald-400 font-mono">DIRECT REVIEW</span>
               </div>
-              <p className="text-xs text-[#788294] pl-7 mb-2">
-                Have your In-Game Character ID (IGID) ready for custom lobby whitelisting.
+              <p className="text-xs text-[#CBD5E1] pl-7 mb-2 leading-relaxed">
+                Have any objections, rule obligations, match disputes, points table clarifications, or administrative concerns? Drop your message and our team will review and resolve it promptly.
               </p>
               <div className="flex items-center justify-between pt-2 border-t border-[#1E2536] text-[10px] pl-7">
-                <span className="text-[#64748B]">Response SLA: &lt; 15 mins</span>
-                <span className="text-[#E5C05B] font-bold cursor-pointer hover:underline">View Guidelines ▾</span>
+                <span className="text-[#64748B]">Transparent Response: Fast & Dedicated</span>
+                <span className="text-[#E5C05B] font-bold">100% Addressed</span>
               </div>
             </div>
           </div>

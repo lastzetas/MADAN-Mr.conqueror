@@ -282,28 +282,28 @@ export const RightSidebarDashboard = () => {
             <div className="p-2.5 rounded-lg bg-[#0E2E25] border border-[#1BE7A3]/50 text-xs font-rajdhani text-[#1BE7A3] mb-2">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-4 h-4 rounded-full bg-[#1BE7A3] text-black font-bold text-[8px] flex items-center justify-center">
-                  S
+                  🤝
                 </div>
-                <span className="text-[10px] font-bold">Simon Vincent</span>
-                <span className="text-[9px] opacity-70 ml-auto font-mono">FLOOR 18</span>
+                <span className="text-[10px] font-bold">Encouragement & Business</span>
+                <span className="text-[9px] opacity-80 ml-auto font-mono">ALL WELCOME</span>
               </div>
               <p className="text-[10px] leading-tight text-[#8EECCE]">
-                Your conqueror slot queries and custom room credentials are addressed instantly.
+                Any kind of business enquiry, collaboration pitch, fan encouragement, or feedback is accepted!
               </p>
             </div>
 
             {/* Dark Gray Chat Bubble Card */}
             <div className="p-2.5 rounded-lg bg-[#11151E] border border-[#1E2536] text-[10px] font-rajdhani text-[#94A3B8]">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[#E5C05B] font-bold">Kamo</span>
-                <span className="text-[9px] text-[#64748B]">7 hours ago</span>
+                <span className="text-[#E5C05B] font-bold">⚖️ Objections & Obligations</span>
+                <span className="text-[9px] text-emerald-400 font-mono">DIRECT REVIEW</span>
               </div>
-              <p className="text-[10px] text-[#788294] mb-1">
-                Have your in-game ID ready for whitelist?
+              <p className="text-[10px] text-[#CBD5E1] mb-1">
+                Have any objections, disputes, points clarification, or concerns? Send them for direct review.
               </p>
               <div className="flex items-center justify-between pt-1 border-t border-[#1E2536] text-[9px]">
-                <span className="text-[#64748B]">Match Ops SLA: &lt; 15 mins</span>
-                <span className="text-[#E5C05B] cursor-pointer">More ▾</span>
+                <span className="text-[#64748B]">Transparent Response SLA</span>
+                <span className="text-[#E5C05B] font-bold">100% Addressed</span>
               </div>
             </div>
           </div>
