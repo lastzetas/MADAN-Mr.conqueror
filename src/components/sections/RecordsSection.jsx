@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Trophy, ChevronLeft, ChevronRight, Crown, Flame, ExternalLink, Play, Sparkles } from 'lucide-react';
 import { soundFx } from '../../utils/audio';
 
@@ -10,12 +10,16 @@ export const RecordsSection = () => {
   ];
 
   const timelineNodes = [
-    { value: '525', date: 'Jan 2022', hasTrophy: false },
-    { value: '706', date: 'Jan 2022', hasTrophy: false },
-    { value: '970', date: 'Jan 2022', hasTrophy: false },
-    { value: '789', date: '190', hasTrophy: true },
-    { value: '792', date: '106', hasTrophy: true },
-    { value: '893', date: '930', hasTrophy: true },
+    { value: '0', date: 'Start', hasTrophy: false },
+    { value: '25', date: '25 Wins', hasTrophy: false },
+    { value: '50', date: '50 Wins', hasTrophy: false },
+    { value: '75', date: '75 Wins', hasTrophy: false },
+    { value: '100', date: '100 Wins', hasTrophy: true },
+    { value: '125', date: '125 Wins', hasTrophy: false },
+    { value: '150', date: '150 Wins', hasTrophy: true },
+    { value: '175', date: '175 Wins', hasTrophy: false },
+    { value: '200', date: '200 Wins', hasTrophy: true },
+    { value: '225', date: '225 Wins', hasTrophy: true },
     { value: '236 WR', date: 'Historic', hasTrophy: true, isRecord: true },
   ];
 
@@ -151,37 +155,55 @@ export const RecordsSection = () => {
             Conqueror's Timeline
           </h4>
           <p className="font-rajdhani text-xs text-[#788294] mb-6">
-            Conquerors meets Conquerer's Timeline
+            Official 236 Consecutive Wins Streak Progression (0 to 236)
           </p>
 
           {/* Timeline Track & Nodes */}
-          <div className="relative pt-6 pb-2 px-3">
-            {/* Gold Horizontal Track Line */}
-            <div className="absolute top-[38px] left-6 right-6 h-[2px] bg-gradient-to-r from-[#B8860B] via-[#E5C05B] to-[#B8860B] z-0" />
+          <div className="relative pt-6 pb-2 px-2 overflow-x-auto no-scrollbar">
+            <div className="min-w-[650px] relative">
+              {/* Gold Horizontal Track Line */}
+              <div className="absolute top-[38px] left-4 right-4 h-[2px] bg-gradient-to-r from-[#B8860B] via-[#E5C05B] to-[#FFD700] z-0" />
 
-            {/* 7 Nodes */}
-            <div className="grid grid-cols-7 gap-1 text-center relative z-10">
-              {timelineNodes.map((node, idx) => (
-                <div key={idx} className="flex flex-col items-center">
-                  {/* Gold Trophy above node if applicable */}
-                  <div className="h-5 flex items-center justify-center mb-1">
-                    {node.hasTrophy && (
-                      <Trophy className="w-4 h-4 text-[#E5C05B] fill-[#E5C05B]" />
-                    )}
+              {/* 11 Milestone Nodes */}
+              <div className="grid grid-cols-11 gap-1 text-center relative z-10">
+                {timelineNodes.map((node, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    {/* Gold Trophy above node if applicable */}
+                    <div className="h-5 flex items-center justify-center mb-1">
+                      {node.hasTrophy && (
+                        <Trophy className="w-3.5 h-3.5 text-[#E5C05B] fill-[#E5C05B]" />
+                      )}
+                    </div>
+
+                    {/* Node Point dot */}
+                    <div
+                      className={`w-3.5 h-3.5 rounded-full border-2 border-[#0C0F15] transition-transform ${
+                        node.isRecord
+                          ? 'bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-pulse scale-125'
+                          : node.hasTrophy
+                          ? 'bg-[#FFD700] shadow-[0_0_8px_rgba(255,215,0,0.8)]'
+                          : 'bg-[#E5C05B] shadow-[0_0_6px_rgba(229,192,91,0.6)]'
+                      }`}
+                    />
+
+                    {/* Node Value */}
+                    <span
+                      className={`font-mono text-[11px] sm:text-xs font-bold mt-2 ${
+                        node.isRecord ? 'text-[#FFD700] font-black' : 'text-[#EAECEF]'
+                      }`}
+                    >
+                      {node.value}
+                    </span>
+
+                    {/* Node Label */}
+                    <span className={`font-rajdhani text-[10px] sm:text-[11px] font-semibold truncate ${
+                      node.isRecord ? 'text-amber-400 font-bold' : 'text-[#788294]'
+                    }`}>
+                      {node.date}
+                    </span>
                   </div>
-
-                  {/* Node Point dot */}
-                  <div className={`w-3 h-3 rounded-full border-2 border-[#0C0F15] ${node.isRecord ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.9)] animate-pulse' : 'bg-[#E5C05B] shadow-[0_0_8px_rgba(229,192,91,0.8)]'}`} />
-
-                  {/* Node Value & Date */}
-                  <span className={`font-mono text-xs font-bold mt-2 ${node.isRecord ? 'text-[#E5C05B]' : 'text-[#EAECEF]'}`}>
-                    {node.value}
-                  </span>
-                  <span className="font-rajdhani text-[11px] text-[#788294] font-semibold">
-                    {node.date}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
