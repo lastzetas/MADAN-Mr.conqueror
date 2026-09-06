@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, ExternalLink, Sparkles, Award, Star, HeartHandshake } from 'lucide-react';
+import { Shield, ExternalLink, Sparkles, Award, Star, HeartHandshake, ArrowRight } from 'lucide-react';
 import { soundFx } from '../../utils/audio';
 import { getStoredSponsors } from '../../utils/portalData';
 
-export const SponsorsSection = () => {
+export const SponsorsSection = ({ onOpenSponsorModal }) => {
   const [sponsors, setSponsors] = useState([]);
 
   useEffect(() => {
@@ -45,70 +45,91 @@ export const SponsorsSection = () => {
             <span className="text-[11px] font-mono text-[#E5C05B] bg-[#131722] px-3 py-1 rounded-full border border-[#222A3A]">
               {sponsors.length} Verified Partners
             </span>
+            <button
+              onClick={() => {
+                soundFx.playClick();
+                onOpenSponsorModal?.();
+              }}
+              className="px-3 py-1 rounded-full bg-[#E5C05B]/15 hover:bg-[#E5C05B]/25 border border-[#E5C05B]/40 text-[#E5C05B] text-xs font-montserrat font-bold uppercase transition-all cursor-pointer"
+            >
+              + Partner With Us
+            </button>
           </div>
         </div>
 
         {/* Sponsors Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-          {sponsors.map((sponsor) => (
-            <a
-              key={sponsor.id}
-              href={sponsor.link || '#'}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => soundFx.playClick()}
-              onMouseEnter={() => soundFx.playHover()}
-              className="group p-4 rounded-xl bg-[#11151E] border border-[#1E2536] hover:border-[#E5C05B]/60 transition-all flex flex-col justify-between cursor-pointer hover:shadow-[0_0_20px_rgba(229,192,91,0.15)] transform hover:-translate-y-1"
-            >
-              <div>
-                {/* Logo & Tier Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-montserrat font-bold uppercase tracking-wider ${
-                    sponsor.tier === 'TITLE'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                      : sponsor.tier === 'PLATINUM'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  }`}>
-                    {sponsor.tier || 'OFFICIAL'}
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#E5C05B] transition-colors" />
+        {sponsors.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+            {sponsors.map((sponsor) => (
+              <a
+                key={sponsor.id}
+                href={sponsor.link || '#'}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => soundFx.playClick()}
+                onMouseEnter={() => soundFx.playHover()}
+                className="group p-4 rounded-xl bg-[#11151E] border border-[#1E2536] hover:border-[#E5C05B]/60 transition-all flex flex-col justify-between cursor-pointer hover:shadow-[0_0_20px_rgba(229,192,91,0.15)] transform hover:-translate-y-1"
+              >
+                <div>
+                  {/* Logo & Tier Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-montserrat font-bold uppercase tracking-wider ${
+                      sponsor.tier === 'TITLE'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : sponsor.tier === 'PLATINUM'
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    }`}>
+                      {sponsor.tier || 'OFFICIAL'}
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#E5C05B] transition-colors" />
+                  </div>
+
+                  {/* Sponsor Image / Logo */}
+                  <div className="w-full h-24 rounded-lg bg-black/50 border border-[#1E2536] group-hover:border-[#E5C05B]/30 flex items-center justify-center p-3 mb-3 overflow-hidden">
+                    {sponsor.logo ? (
+                      <img
+                        src={sponsor.logo}
+                        alt={sponsor.name}
+                        className="max-h-full max-w-full object-contain filter group-hover:brightness-110 transition-all"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 text-gray-500 font-montserrat font-bold text-xs">
+                        <Award className="w-5 h-5 text-[#E5C05B]" />
+                        <span>{sponsor.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Company Name & Category */}
+                  <h4 className="font-montserrat font-bold text-sm text-white group-hover:text-[#E5C05B] transition-colors truncate">
+                    {sponsor.name}
+                  </h4>
+                  <p className="text-[11px] font-mono text-[#788294] mt-0.5 truncate">
+                    {sponsor.category || 'Official Partner'}
+                  </p>
                 </div>
 
-                {/* Sponsor Image / Logo */}
-                <div className="w-full h-24 rounded-lg bg-black/50 border border-[#1E2536] group-hover:border-[#E5C05B]/30 flex items-center justify-center p-3 mb-3 overflow-hidden">
-                  {sponsor.logo ? (
-                    <img
-                      src={sponsor.logo}
-                      alt={sponsor.name}
-                      className="max-h-full max-w-full object-contain filter group-hover:brightness-110 transition-all"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-2 text-gray-500 font-montserrat font-bold text-xs">
-                      <Award className="w-5 h-5 text-[#E5C05B]" />
-                      <span>{sponsor.name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Company Name & Category */}
-                <h4 className="font-montserrat font-bold text-sm text-white group-hover:text-[#E5C05B] transition-colors truncate">
-                  {sponsor.name}
-                </h4>
-                <p className="text-[11px] font-mono text-[#788294] mt-0.5 truncate">
-                  {sponsor.category || 'Official Partner'}
-                </p>
-              </div>
-
-              {/* Tagline */}
-              {sponsor.tagline && (
-                <div className="mt-3 pt-2 border-t border-[#1E2536] text-[10px] font-rajdhani text-gray-400 italic truncate">
-                  "{sponsor.tagline}"
-                </div>
-              )}
-            </a>
-          ))}
-        </div>
+                {/* Tagline */}
+                {sponsor.tagline && (
+                  <div className="mt-3 pt-2 border-t border-[#1E2536] text-[10px] font-rajdhani text-gray-400 italic truncate">
+                    "{sponsor.tagline}"
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="p-8 rounded-xl bg-[#11151E] border border-[#1E2536] text-center space-y-2">
+            <HeartHandshake className="w-8 h-8 text-[#E5C05B] mx-auto opacity-80" />
+            <h4 className="font-montserrat font-bold text-sm text-white uppercase">
+              Official Sponsorship Portal Open
+            </h4>
+            <p className="text-xs text-[#788294] font-rajdhani max-w-md mx-auto">
+              Partner with the Madan Conqueror Arena. Verified sponsor slots are actively being onboarded by Match Ops.
+            </p>
+          </div>
+        )}
 
         {/* Sponsor Call to Action Banner */}
         <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-[#11151E] via-[#161B26] to-[#11151E] border border-[#1E2536] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
@@ -126,13 +147,15 @@ export const SponsorsSection = () => {
             </div>
           </div>
 
-          <a
-            href="#contact"
-            onClick={() => soundFx.playClick()}
-            className="px-4 py-1.5 rounded-lg bg-[#E5C05B] hover:bg-[#F3CF7A] text-[#0A0D12] font-montserrat font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0"
+          <button
+            onClick={() => {
+              soundFx.playClick();
+              onOpenSponsorModal?.();
+            }}
+            className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#FFD700] via-[#E5C05B] to-[#D4AF37] hover:brightness-110 text-[#0A0D12] font-montserrat font-extrabold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(229,192,91,0.4)] shrink-0 cursor-pointer transform hover:scale-105"
           >
             Partner With Us
-          </a>
+          </button>
         </div>
 
       </div>

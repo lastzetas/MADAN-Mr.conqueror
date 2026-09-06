@@ -9,12 +9,14 @@ const STORAGE_KEYS = {
   HALL_OF_FAME: 'madan_portal_hall_of_fame_v7',
   POLLS: 'madan_portal_polls_v7',
   SPONSORS: 'madan_portal_sponsors_v7',
+  SPONSOR_REQUESTS: 'madan_portal_sponsor_requests_v7',
   ROOM_BROADCAST: 'madan_portal_room_broadcast_v7'
 };
 
 // ZERO DEMO DATA - Starts clean, live queue
 const INITIAL_REGISTRATIONS = [];
 const INITIAL_INQUIRIES = [];
+const INITIAL_SPONSOR_REQUESTS = [];
 
 // Global Real-Time PubSub Channel (ntfy.sh open SSE / HTTP stream for zero-latency cross-device broadcast)
 const LIVE_SYNC_TOPIC = 'https://ntfy.sh/madan_conqueror_live_squads_2026';
@@ -871,6 +873,18 @@ export const saveSponsor = (sponsorData) => {
   return updated;
 };
 
+export const updateSponsor = (id, updatedData) => {
+  const current = getStoredSponsors();
+  const updated = current.map(s => s.id === id ? { ...s, ...updatedData } : s);
+  try {
+    localStorage.setItem(STORAGE_KEYS.SPONSORS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Error updating sponsor:', e);
+  }
+  window.dispatchEvent(new CustomEvent('portal_sponsors_updated', { detail: updated }));
+  return updated;
+};
+
 export const deleteSponsor = (id) => {
   const current = getStoredSponsors();
   const updated = current.filter(s => s.id !== id);
@@ -881,6 +895,116 @@ export const deleteSponsor = (id) => {
   }
   window.dispatchEvent(new CustomEvent('portal_sponsors_updated', { detail: updated }));
   return updated;
+};
+
+// ==========================================
+// 13.1 INCOMING SPONSOR PARTNERSHIP REQUESTS
+// ==========================================
+
+export const getStoredSponsorRequests = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SPONSOR_REQUESTS);
+    if (!raw) {
+      return INITIAL_SPONSOR_REQUESTS;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : INITIAL_SPONSOR_REQUESTS;
+  } catch (e) {
+    return INITIAL_SPONSOR_REQUESTS;
+  }
+};
+
+export const saveSponsorRequest = (requestData) => {
+  const current = getStoredSponsorRequests();
+  const newRequest = {
+    id: `SP-REQ-${Date.now().toString().slice(-6)}`,
+    ticketId: `SPR-${Math.floor(100000 + Math.random() * 900000)}`,
+    name: requestData.name || 'Brand Representative',
+    business: requestData.business || 'New Sponsor Brand',
+    city: requestData.city || 'National',
+    email: requestData.email || '',
+    phone: requestData.phone || '',
+    tierInterest: requestData.tierInterest || 'TITLE',
+    notes: requestData.notes || '',
+    status: 'PENDING',
+    createdAt: new Date().toISOString(),
+    submittedAt: new Date().toLocaleDateString('en-IN', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  };
+
+  const updated = [newRequest, ...current];
+  try {
+    localStorage.setItem(STORAGE_KEYS.SPONSOR_REQUESTS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Error saving sponsor request:', e);
+  }
+
+  // Real-time broadcast
+  window.dispatchEvent(new CustomEvent('portal_sponsor_requests_updated', { detail: updated }));
+
+  // Push to backend / Mongo API
+  fetch('/api/sponsor-requests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newRequest)
+  }).catch(err => console.warn('MongoDB sponsor request notice:', err));
+
+  return { success: true, request: newRequest, all: updated };
+};
+
+export const updateSponsorRequestStatus = (id, status) => {
+  const current = getStoredSponsorRequests();
+  const updated = current.map(r => r.id === id ? { ...r, status } : r);
+  try {
+    localStorage.setItem(STORAGE_KEYS.SPONSOR_REQUESTS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Error updating sponsor request:', e);
+  }
+  window.dispatchEvent(new CustomEvent('portal_sponsor_requests_updated', { detail: updated }));
+  return updated;
+};
+
+export const deleteSponsorRequest = (id) => {
+  const current = getStoredSponsorRequests();
+  const updated = current.filter(r => r.id !== id);
+  try {
+    localStorage.setItem(STORAGE_KEYS.SPONSOR_REQUESTS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Error deleting sponsor request:', e);
+  }
+  window.dispatchEvent(new CustomEvent('portal_sponsor_requests_updated', { detail: updated }));
+  return updated;
+};
+
+export const convertSponsorRequestToSponsor = (requestId, overrides = {}) => {
+  const requests = getStoredSponsorRequests();
+  const found = requests.find(r => r.id === requestId);
+  if (!found) return { success: false, message: 'Request not found' };
+
+  // 1. Mark request as APPROVED
+  updateSponsorRequestStatus(requestId, 'APPROVED');
+
+  // 2. Create as live public sponsor
+  const newSponsor = {
+    name: overrides.name || found.business || found.name,
+    category: overrides.category || `${found.tierInterest || 'Official'} Energy / Brand Partner`,
+    tier: overrides.tier || found.tierInterest || 'TITLE',
+    logo: overrides.logo || '',
+    link: overrides.link || found.notes || 'https://',
+    status: 'ACTIVE',
+    tagline: overrides.tagline || `Official Partner from ${found.city}`,
+    contactName: found.name,
+    contactPhone: found.phone,
+    contactEmail: found.email
+  };
+
+  const updatedSponsors = saveSponsor(newSponsor);
+  return { success: true, sponsor: newSponsor, allSponsors: updatedSponsors };
 };
 
 // ==========================================

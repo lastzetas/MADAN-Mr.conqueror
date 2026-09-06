@@ -11,6 +11,7 @@ import { CommunitySection } from './components/sections/CommunitySection';
 import { SponsorsSection } from './components/sections/SponsorsSection';
 import { ContactSection } from './components/sections/ContactSection';
 import { TournamentRegistrationModal } from './components/TournamentRegistrationModal';
+import { SponsorRequestModal } from './components/SponsorRequestModal';
 import { LiveStreamModal } from './components/LiveStreamModal';
 import { LoginModal } from './components/LoginModal';
 import { SuperAdminDashboard } from './components/SuperAdminDashboard';
@@ -26,6 +27,7 @@ export function App() {
 
   // Interactive Modals State
   const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
+  const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false);
   const [isLiveStreamModalOpen, setIsLiveStreamModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -244,7 +246,7 @@ export function App() {
           <CommunitySection />
 
           {/* Section 8: Sponsors & Supporters Showcase (Replaced Reviews) */}
-          <SponsorsSection />
+          <SponsorsSection onOpenSponsorModal={() => setIsSponsorModalOpen(true)} />
 
           {/* Section 9: Contact Us & Official Inquiries Desk */}
           <ContactSection />
@@ -276,6 +278,12 @@ export function App() {
         isOpen={isTournamentModalOpen}
         onClose={handleCloseTournamentModal}
         selectedTournament={selectedTournament}
+      />
+
+      {/* Sponsor Partnership Request Modal */}
+      <SponsorRequestModal
+        isOpen={isSponsorModalOpen}
+        onClose={() => setIsSponsorModalOpen(false)}
       />
 
       {/* Live Stream Modal */}
